@@ -2,6 +2,7 @@ package scribbleserver_0.pkg01;
 
 import java.io.*;   // for IOException and Input/OutputStream
 import java.net.*;  // for Socket, ServerSocket, and InetAddress
+import java.util.Vector;
 
 /**
  *
@@ -11,10 +12,12 @@ public class Receiver implements Runnable
 {
 
     private static final int BUFSIZE = 1000;   // Size of receive buffer
-    boolean run = false;
+    private boolean run = false;
+    private Vector<User> mUsers;
 
-    Receiver()
+    Receiver(Vector<User> user )
     {
+        mUsers=user;
     }
 
     public void run()
@@ -48,9 +51,9 @@ public class Receiver implements Runnable
                 }
 
                 s = new String(byteBuffer);
-                System.out.print(s);
+                //System.out.print(s);
                 
-                
+                new Thread(new PacketAnalyzer(s, clntSock.getInetAddress(), mUsers)).start();
 
                 clntSock.close();  // Close the socket.  We are done with this client!
 

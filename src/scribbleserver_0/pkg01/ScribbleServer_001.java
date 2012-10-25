@@ -4,6 +4,8 @@
  */
 package scribbleserver_0.pkg01;
 
+import java.util.Vector;
+
 /**
  *
  * @author scribble
@@ -16,13 +18,17 @@ public class ScribbleServer_001
      */
     public static void main(String[] args)
     {
+        Vector<User> mUsers = new Vector<User>();
         // TODO code application logic here
-        Thread t = new Thread(new Receiver());//.start();
+        Thread t = new Thread(new Receiver(mUsers));//.start();
+
         t.setPriority(Thread.MAX_PRIORITY);
+
         t.start();
         //r.start();
         //Sender s = new Sender();
         //s.start();
+
         while (t.isAlive())
         {
 
@@ -34,6 +40,5 @@ public class ScribbleServer_001
             {
             }
         }
-
     }
 }
