@@ -14,10 +14,12 @@ public class Receiver implements Runnable
     private static final int BUFSIZE = 1000;   // Size of receive buffer
     private boolean run = false;
     private Vector<User> mUsers;
+    private Vector<File> mFiles;
 
-    Receiver(Vector<User> user )
+    Receiver(Vector<User> user , Vector<File> files)
     {
         mUsers=user;
+        mFiles=files;
     }
 
     public void run()
@@ -53,7 +55,7 @@ public class Receiver implements Runnable
                 s = new String(byteBuffer);
                 //System.out.print(s);
                 
-                new Thread(new PacketAnalyzer(s, clntSock.getInetAddress(), mUsers)).start();
+                new Thread(new PacketAnalyzer(s, clntSock.getInetAddress(), mUsers, mFiles)).start();
 
                 clntSock.close();  // Close the socket.  We are done with this client!
 

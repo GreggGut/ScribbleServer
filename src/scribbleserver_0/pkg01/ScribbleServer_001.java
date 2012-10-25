@@ -19,8 +19,9 @@ public class ScribbleServer_001
     public static void main(String[] args)
     {
         Vector<User> mUsers = new Vector<User>();
+        Vector<File> mFiles = new Vector<File>();
         // TODO code application logic here
-        Thread t = new Thread(new Receiver(mUsers));//.start();
+        Thread t = new Thread(new Receiver(mUsers, mFiles));//.start();
 
         t.setPriority(Thread.MAX_PRIORITY);
 
