@@ -14,7 +14,7 @@ public class Page
 {
 
     private int pageNumber;
-    private File mParentFile;
+    private SCFile mParentFile;
     private ArrayList<Path> mPaths = new ArrayList<Path>();
 
     Page()

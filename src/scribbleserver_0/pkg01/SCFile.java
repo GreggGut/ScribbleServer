@@ -10,7 +10,7 @@ import java.util.ArrayList;
  *
  * @author scribble
  */
-public class File
+public class SCFile
 {
 
     private String name;
@@ -19,7 +19,7 @@ public class File
     private ArrayList<User> mActiveUsers = new ArrayList<User>();
     private User presentOwner=null;
 
-    File(String n, String l)
+    SCFile(String n, String l)
     {
         name=n;
         location=l;

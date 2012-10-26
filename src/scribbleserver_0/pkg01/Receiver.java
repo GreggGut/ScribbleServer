@@ -11,15 +11,14 @@ import java.util.Vector;
 public class Receiver implements Runnable
 {
 
-    private static final int BUFSIZE = 1000;   // Size of receive buffer
     private boolean run = false;
     private Vector<User> mUsers;
-    private Vector<File> mFiles;
+    private Vector<SCFile> mFiles;
 
-    Receiver(Vector<User> user , Vector<File> files)
+    Receiver(Vector<User> user, Vector<SCFile> files)
     {
-        mUsers=user;
-        mFiles=files;
+        mUsers = user;
+        mFiles = files;
     }
 
     public void run()
@@ -38,23 +37,16 @@ public class Receiver implements Runnable
 
             while (run)
             {
-                byte[] byteBuffer = new byte[BUFSIZE];  // Receive buffer
                 // Run forever, accepting and servicing connections
                 Socket clntSock = servSock.accept();     // Get client connection
                 System.out.println("Handling client at " + clntSock.getInetAddress().getHostAddress() + " on port " + clntSock.getPort());
-                InputStream in = clntSock.getInputStream();
+                //InputStream in = clntSock.getInputStream();
                 OutputStream out = clntSock.getOutputStream();
 
-                // Receive until client closes connection, indicated by -1 return
+                BufferedReader in = new BufferedReader(new InputStreamReader(clntSock.getInputStream()));
 
-                while ((recvMsgSize = in.read(byteBuffer)) != -1)
-                {
-                    out.write(byteBuffer, 0, recvMsgSize);
-                }
+                s = in.readLine();
 
-                s = new String(byteBuffer);
-                //System.out.print(s);
-                
                 new Thread(new PacketAnalyzer(s, clntSock.getInetAddress(), mUsers, mFiles)).start();
 
                 clntSock.close();  // Close the socket.  We are done with this client!

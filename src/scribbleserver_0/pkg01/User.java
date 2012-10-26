@@ -8,7 +8,7 @@ import java.net.InetAddress;
 
 /**
  *
- * @author scribble
+ * @author Grzegorz Gut <Gregg.Gut@gmail.com>
  */
 public class User
 {
@@ -16,7 +16,7 @@ public class User
     private String name;
     private InetAddress address;
     private String password;
-    private File activeFile;
+    private SCFile activeFile;
     private boolean ownership = false;
     private boolean loggedIn = false;
 
@@ -56,7 +56,8 @@ public class User
             }
             //ownership=false;
 
-            System.out.println("Logged out!");
+            System.out.println(name+ " logged out!");
+            
             return true;
         }
         return false;
@@ -72,7 +73,7 @@ public class User
         return address;
     }
 
-    public File getActiveFile()
+    public SCFile getActiveFile()
     {
         return activeFile;
     }
@@ -87,7 +88,7 @@ public class User
         return loggedIn;
     }
 
-    public void setActiveFile(File activeFile)
+    public void setActiveFile(SCFile activeFile)
     {
         this.activeFile = activeFile;
     }
