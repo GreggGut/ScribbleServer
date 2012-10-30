@@ -20,6 +20,11 @@ public class Page
     Page()
     {
     }
+    
+    public void addPath(Path path)
+    {
+        mPaths.add(path);
+    }
 }
 
 /*

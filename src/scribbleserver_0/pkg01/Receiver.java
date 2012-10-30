@@ -14,11 +14,13 @@ public class Receiver implements Runnable
     private boolean run = false;
     private Vector<User> mUsers;
     private Vector<SCFile> mFiles;
+    private Vector<Request> mRequests;
 
-    Receiver(Vector<User> user, Vector<SCFile> files)
+    Receiver(Vector<User> user, Vector<SCFile> files, Vector<Request> mRequests)
     {
         mUsers = user;
         mFiles = files;
+        this.mRequests = mRequests;
     }
 
     public void run()
@@ -47,7 +49,7 @@ public class Receiver implements Runnable
 
                 s = in.readLine();
 
-                new Thread(new PacketAnalyzer(s, clntSock.getInetAddress(), mUsers, mFiles)).start();
+                new Thread(new PacketAnalyzer(s, clntSock.getInetAddress(), mUsers, mFiles, mRequests)).start();
 
                 clntSock.close();  // Close the socket.  We are done with this client!
 

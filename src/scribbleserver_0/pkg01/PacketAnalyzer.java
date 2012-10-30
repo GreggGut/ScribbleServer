@@ -19,13 +19,15 @@ public class PacketAnalyzer implements Runnable
     private Vector<User> mUsers;
     private Vector<SCFile> mFiles;
     private final String split = "---";
+    private Vector<Request> mRequests;
 
-    PacketAnalyzer(String info, InetAddress ip, Vector<User> user, Vector<SCFile> files)
+    PacketAnalyzer(String info, InetAddress ip, Vector<User> user, Vector<SCFile> files, Vector<Request> mRequests)
     {
         toBeAnalyzed = info;
         clientAddress = ip;
         mUsers = user;
         mFiles = files;
+        this.mRequests = mRequests;
     }
 
     public void run()
@@ -57,9 +59,23 @@ public class PacketAnalyzer implements Runnable
             {
                 case 0:
                     //login
-                    if (info.length > 2)
+                    //Info will contain the following
+                    //login - username - password
+                    if (info.length > 3)
                     {
-                        User user = new User(info[1], info[2], clientAddress);
+                        int port;
+                        try
+                        {
+                            port = Integer.parseInt(info[3]);
+                        }
+                        catch (NumberFormatException e)
+                        {
+                            //if the port fails to be translated into a number we cannot do anything and therefore we drop this request
+                            break;
+                        }
+
+                        //String name, String password, InetAddress address, int port
+                        User user = new User(info[1], info[2], clientAddress, port);
 
                         boolean userExists = false;
                         //allowing unique usernames to be logged in simultaniously
@@ -87,17 +103,24 @@ public class PacketAnalyzer implements Runnable
                             }
                             else
                             {
-                                /*
-                                 * Error!!!!!
-                                 * Cannot login, wrong username/password combination
-                                 */
                             }
+                        }
+                        else
+                        {
+                            String toSend = "";
+                            toSend += ServerToClient.logInFailed;
+                            toSend += split;
+                            toSend += ServerToClient.usernameAlreadyLoggedIn;
+                            toSend += split;
+
+                            HELPER.send(toSend, user.getAddress(), user.getPort());
                         }
                     }
                     break;
 
                 case 1:
                     //logout
+                    //logout - username
                     if (info.length > 1)
                     {
                         for (int i = 0; i < mUsers.size(); i++)
@@ -125,38 +148,57 @@ public class PacketAnalyzer implements Runnable
 
                 case 2:
                     //Request Ownership
-                    if (info.length > 1)
+                    //requestOwnership - username - ID
+                    if (info.length > 2)
                     {
-                        String username = info[1];
-                        //String fileName = info[2];
-                        for (User user : mUsers)
+                        try
                         {
-                            //Find the requesting user
-                            if (user.getName().equals(username) && user.getAddress().equals(clientAddress))
+                            String username = info[1];
+                            int requestID = Integer.parseInt(info[2]);
+
+                            for (User user : mUsers)
                             {
-                                //Make sure user is logged in
-                                if (user.isLoggedIn())
+                                //Find the requesting user
+                                if (user.getName().equals(username) && user.getAddress().equals(clientAddress))
                                 {
-                                    //no owner
+                                    //Making sure there is no owner
                                     if (user.getActiveFile().getPresentOwner() == null)
                                     {
                                         user.getActiveFile().setPresentOwner(user);
                                         user.setOwnership(true);
+
+                                        String toSend = "";
+                                        toSend += ServerToClient.ownershipTaken;
+                                        toSend += split;
+                                        toSend += user.getName();
+                                        toSend += split;
+
+                                        //Informing all users that the file ownership has been taken
+                                        for (User allUsers : user.getActiveFile().getmActiveUsers())
+                                        {
+                                            HELPER.send(toSend, allUsers.getAddress(), allUsers.getPort());
+                                        }
+
                                     }
-                                }
-                                else
-                                {
-                                    //User needs to login first
-                                    break;
+                                    else
+                                    {
+                                        //User needs to login first
+                                        break;
+                                    }
                                 }
                             }
                         }
+                        catch (Exception x)
+                        {
+                        }
+
                     }
 
                     break;
 
                 case 3:
                     //Release Ownership
+                    //releaseOwnership - username
                     if (info.length > 1)
                     {
                         String username = info[1];
@@ -170,6 +212,14 @@ public class PacketAnalyzer implements Runnable
                                 /*
                                  * Broadcast to all that the ownership is free
                                  */
+                                String toSend = "";
+                                toSend += ServerToClient.noOwnerOfFile;
+                                toSend += split;
+
+                                for (User allUsers : user.getActiveFile().getmActiveUsers())
+                                {
+                                    HELPER.send(toSend, allUsers.getAddress(), allUsers.getPort());
+                                }
 
                                 break;
                             }
@@ -180,8 +230,9 @@ public class PacketAnalyzer implements Runnable
 
                 case 4:
                     //Get file list
+                    //getFileList
                     String toBeSend = "";
-                    toBeSend += ServerToClient.FileListAvailable;
+                    toBeSend += ServerToClient.fileListAvailable;
                     toBeSend += split;
 
                     for (SCFile file : mFiles)
@@ -200,6 +251,62 @@ public class PacketAnalyzer implements Runnable
 
                 case 6:
                     //New Path
+                    //newPath - username - requestD - pathID - mode - color - active - page
+
+                    //find the user who is sending this
+                    SCFile mfile = null;
+                    User currentUser = null;
+                    for (User user : mUsers)
+                    {
+                        if (user.getName().equals(info[1]) && user.getAddress().equals(clientAddress))
+                        {
+                            mfile = user.getActiveFile();
+                            currentUser = user;
+                            break;
+                        }
+                    }
+
+                    if (mfile != null && currentUser != null)
+                    {
+                        //Create new path for the user decument
+                        //(int id, boolean mode, int color, boolean active)
+                        try
+                        {
+                            int requestID = Integer.parseInt(info[2]);
+                            int pathID = Integer.parseInt(info[3]);
+                            boolean mode;
+                            if (info[4].equals("0"))
+                            {
+                                mode = false;
+                            }
+                            {
+                                mode = true;
+                            }
+                            int color = Integer.parseInt(info[5]);
+                            boolean active;
+                            if (info[6].equals("0"))
+                            {
+                                active = false;
+                            }
+                            {
+                                active = true;
+                            }
+
+                            int page = Integer.parseInt(info[7]);
+
+                            Path p = new Path(pathID, mode, color, active);
+
+                            mfile.getmPages().get(page).addPath(p);
+                            currentUser.setWorkingPage(mfile.getmPages().get(page));
+
+                        }
+                        catch (Exception e)
+                        {
+                        }
+
+                    }
+
+                    //byte[] infos = info.getBytes();                    
                     break;
 
                 case 7:
@@ -215,7 +322,7 @@ public class PacketAnalyzer implements Runnable
                     break;
 
                 case 10:
-                    //redi last action
+                    //redo last action
                     break;
 
                 case 11:

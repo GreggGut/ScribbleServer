@@ -4,11 +4,14 @@
  */
 package scribbleserver_0.pkg01;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.ConnectException;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.util.Arrays;
+import java.util.Vector;
 
 /**
  *
@@ -50,23 +53,23 @@ public class HELPER
      * Function used to send data to different users through a UDP socket
      */
 
-    synchronized static void send(String toSend, InetAddress serverAddress, int serverPort)
+    synchronized static void send(String toSend, InetAddress clientAddress, int clientPort)
     {
         int counter = 0;
         //Sending function, will get repeated up to 5 times in case of failures
-        boolean failedSending=true;
+        boolean failedSending = true;
         while (counter < 5)
         {
             try
             {
-                Socket socket = new Socket(serverAddress, serverPort);
+                Socket socket = new Socket(clientAddress, clientPort);
 
                 PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
                 out.print(toSend);
                 out.close();
                 socket.close();  // Close the socket and its streams
 
-                failedSending=false;
+                failedSending = false;
                 break;
             }
             catch (ConnectException x)
@@ -90,10 +93,39 @@ public class HELPER
                 x.printStackTrace();
             }
         }
-        
-        if(failedSending)
+
+        if (failedSending)
         {
             System.out.println("Failed sending... ");
+        }
+    }
+
+    /**
+     * Function that finds all the files in a directory
+     *
+     * @param mFiles - Vector of SCFile that will be filled with the files available to all users
+     */
+    static void getAllFiles(Vector<SCFile> mFiles)
+    {
+        // Directory path here
+        String path = "documents";
+
+        File folder = new File(path);
+        File[] listOfFiles = folder.listFiles();
+
+        //sorting the files in alphabetical order
+        Arrays.sort(listOfFiles);
+
+        for (File file : listOfFiles)//int i = 0; i < listOfFiles.length; i++)
+        {
+
+            if (file.isFile())
+            {
+                SCFile newFile = new SCFile(file.getName(), file.getPath());
+                mFiles.add(newFile);
+
+                System.out.println(file.getName() + " " + file.getPath());
+            }
         }
     }
 }

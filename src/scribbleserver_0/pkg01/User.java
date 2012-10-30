@@ -5,6 +5,7 @@
 package scribbleserver_0.pkg01;
 
 import java.net.InetAddress;
+import java.util.Vector;
 
 /**
  *
@@ -15,22 +16,29 @@ public class User
 
     private String name;
     private InetAddress address;
+    private int port;
     private String password;
     private SCFile activeFile;
     private boolean ownership = false;
     private boolean loggedIn = false;
+    private Page workingPage;
+    private SCFile workingFile;
+    private int currentRequestID;
+    private Vector<Request> mRequests= new Vector<Request>();
 
     /**
      *
      * @param n
      * @param pass
      * @param add
+     * @param p
      */
-    User(String n, String pass, InetAddress add)
+    User(String n, String pass, InetAddress add, int p)
     {
         name = n;
         address = add;
         password = pass;
+        port = p;
     }
 
     public boolean login()
@@ -56,8 +64,8 @@ public class User
             }
             //ownership=false;
 
-            System.out.println(name+ " logged out!");
-            
+            System.out.println(name + " logged out!");
+
             return true;
         }
         return false;
@@ -96,5 +104,30 @@ public class User
     public void setOwnership(boolean ownership)
     {
         this.ownership = ownership;
+    }
+
+    public int getPort()
+    {
+        return port;
+    }
+
+    public void setWorkingPage(Page workingPage)
+    {
+        this.workingPage = workingPage;
+    }
+
+    public Page getWorkingPage()
+    {
+        return workingPage;
+    }
+    
+    public void setWorkingFile(SCFile workingFile)
+    {
+        this.workingFile = workingFile;
+    }
+
+    public SCFile getWorkingFile()
+    {
+        return workingFile;
     }
 }

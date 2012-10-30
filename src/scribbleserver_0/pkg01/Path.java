@@ -19,7 +19,7 @@ public class Path
     private boolean active;
     private ArrayList<Point> mPoints = new ArrayList<Point>();
 
-    Path()
+    Path(int id, boolean mode, int color, boolean active)
     {
     }
     
