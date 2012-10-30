@@ -37,7 +37,7 @@ public class RequestAnalyser implements Runnable
                 if (mRequest.get(i).getRequestID() == (lastRequestCompleted + 1))
                 {
                     executeRequest(mRequest.get(i));
-                    mRequest.set(i,null);
+                    mRequest.set(i, null);
                     lastRequestCompleted++;
                 }
             }
@@ -71,6 +71,61 @@ public class RequestAnalyser implements Runnable
 
     private void executeRequest(Request request)
     {
-        
+        if (request.getClass().equals(NewPathRequest.class))
+        {
+            executeNewPathRequest((NewPathRequest) request);
+        }
+        else if (request.getClass().equals(NewPointsRequest.class))
+        {
+            executeNewPointsRequest((NewPointsRequest) request);
+        }
+        else if (request.getClass().equals(EndPathRequest.class))
+        {
+            executeEndPathRequest((EndPathRequest) request);
+        }
+        else if (request.getClass().equals(UndoRequest.class))
+        {
+            executeUndoRequest((UndoRequest) request);
+        }
+        else if (request.getClass().equals(RedoRequest.class))
+        {
+            executeRedoRequest((RedoRequest) request);
+        }
+        else if (request.getClass().equals(LogoutRequest.class))
+        {
+            executeLogoutRequest((LogoutRequest) request);
+        }
+        else if (request.getClass().equals(OwnershipRequest.class))
+        {
+            executeOwnershipRequest((OwnershipRequest) request);
+        }
+    }
+
+    private void executeNewPathRequest(NewPathRequest request)
+    {
+    }
+
+    private void executeNewPointsRequest(NewPointsRequest request)
+    {
+    }
+
+    private void executeEndPathRequest(EndPathRequest request)
+    {
+    }
+
+    private void executeUndoRequest(UndoRequest request)
+    {
+    }
+
+    private void executeRedoRequest(RedoRequest request)
+    {
+    }
+
+    private void executeLogoutRequest(LogoutRequest request)
+    {
+    }
+
+    private void executeOwnershipRequest(OwnershipRequest request)
+    {
     }
 }

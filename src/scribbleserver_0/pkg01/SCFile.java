@@ -8,7 +8,7 @@ import java.util.ArrayList;
 
 /**
  *
- * @author scribble
+ * @author Grzegorz Gut <Gregg.Gut@gmail.com>
  */
 public class SCFile
 {

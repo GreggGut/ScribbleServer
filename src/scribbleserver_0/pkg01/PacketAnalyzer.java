@@ -120,24 +120,48 @@ public class PacketAnalyzer implements Runnable
 
                 case 1:
                     //logout
-                    //logout - username
-                    if (info.length > 1)
+                    //logout - username - requestID
+                    if (info.length > 2)
                     {
-                        for (int i = 0; i < mUsers.size(); i++)
+                        try
                         {
-                            if (mUsers.elementAt(i).getName().equals(info[1]) && mUsers.elementAt(i).getAddress().equals(clientAddress))
+                            int requestID = Integer.parseInt(info[2]);
+                            for (int i = 0; i < mUsers.size(); i++)
                             {
-                                if (mUsers.elementAt(i).logout())
+                                if (mUsers.elementAt(i).getName().equals(info[1]) && mUsers.elementAt(i).getAddress().equals(clientAddress))
                                 {
-                                    mUsers.remove(i);
-                                    String toSend = "";
-                                    toSend += ServerToClient.logOutSuccessful;
-                                    HELPER.send(toSend, clientAddress, ServerToClient.serverPort);
-                                }
+                                    LogoutRequest request = new LogoutRequest(requestID);
+                                    mUsers.elementAt(i).addRequest(request);
+                                    
+                                    //waiting until the request has been completed
+                                    while(!request.isCompleted())
+                                    {
+                                        try
+                                        {
+                                            Thread.sleep(300);
+                                        }
+                                        catch(InterruptedException x)
+                                        {
+                                            
+                                        }
+                                    }
+                                    //The logout will be done within the request
+                                    //if (mUsers.elementAt(i).logout())
+                                    {
+                                        mUsers.remove(i);
+                                        String toSend = "";
+                                        toSend += ServerToClient.logOutSuccessful;
+                                        HELPER.send(toSend, clientAddress, ServerToClient.serverPort);
+                                    }
 
-                                break;
+                                    break;
+                                }
                             }
                         }
+                        catch (NumberFormatException x)
+                        {
+                        }
+
                     }
                     else
                     {
@@ -161,6 +185,9 @@ public class PacketAnalyzer implements Runnable
                                 //Find the requesting user
                                 if (user.getName().equals(username) && user.getAddress().equals(clientAddress))
                                 {
+                                    
+                                    
+                                    
                                     //Making sure there is no owner
                                     if (user.getActiveFile().getPresentOwner() == null)
                                     {
@@ -198,7 +225,7 @@ public class PacketAnalyzer implements Runnable
 
                 case 3:
                     //Release Ownership
-                    //releaseOwnership - username
+                    //releaseOwnership - username - requestID
                     if (info.length > 1)
                     {
                         String username = info[1];
@@ -251,7 +278,7 @@ public class PacketAnalyzer implements Runnable
 
                 case 6:
                     //New Path
-                    //newPath - username - requestD - pathID - mode - color - active - page
+                    //newPath - username - requestID - pathID - mode - color - active - page
 
                     //find the user who is sending this
                     SCFile mfile = null;

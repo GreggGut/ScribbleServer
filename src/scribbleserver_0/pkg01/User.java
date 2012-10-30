@@ -24,7 +24,7 @@ public class User
     private Page workingPage;
     private SCFile workingFile;
     private int currentRequestID;
-    private Vector<Request> mRequests= new Vector<Request>();
+    private Vector<Request> mRequests = new Vector<Request>();
 
     /**
      *
@@ -120,7 +120,7 @@ public class User
     {
         return workingPage;
     }
-    
+
     public void setWorkingFile(SCFile workingFile)
     {
         this.workingFile = workingFile;
@@ -129,5 +129,10 @@ public class User
     public SCFile getWorkingFile()
     {
         return workingFile;
+    }
+
+    public void addRequest(Request r)
+    {
+        mRequests.add(r);
     }
 }

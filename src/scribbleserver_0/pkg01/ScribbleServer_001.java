@@ -46,21 +46,24 @@ public class ScribbleServer_001
         mRequests.add(m6);
         mRequests.add(m7);
         mRequests.add(m8);
-        
-        for(int i=0;i<mRequests.size();i++)// r:mRequests)
+
+        for (int i = 0; i < mRequests.size(); i++)// r:mRequests)
         {
-            System.out.println("ID "+mRequests.get(i).getRequestID());
+            System.out.println("ID " + mRequests.get(i).getRequestID());
+            //NewPathRequest a = (NewPathRequest) mRequests.get(i).getPathID();
+            //System.out.println("Maybe: "+(NewPathRequest)mRequests.get(i).getPathID());
+            //executeRequest(mRequests.get(i));
             mRequests.set(i, null);
         }
 
-        System.out.println("Size: "+mRequests.size());
+        System.out.println("Size: " + mRequests.size());
         mRequests.removeAll(Collections.singleton(null));
-        
-        System.out.println("Size: "+mRequests.size());
-        for(Request r:mRequests)
+
+        System.out.println("Size: " + mRequests.size());
+        for (Request r : mRequests)
         {
-            System.out.println("ID "+r.getRequestID());
-            r=null;                 
+            System.out.println("ID " + r.getRequestID());
+            r = null;
         }
 
         //Filling the vector with all the files available to the users
@@ -86,4 +89,33 @@ public class ScribbleServer_001
             }
         }
     }
+//    static private void executeRequest(Request request)
+//    {
+//        if (request.getClass().equals(NewPathRequest.class))
+//        {
+//            executeNewPathRequest((NewPathRequest) request);
+//        }
+//        else if (request.getClass().equals(NewPointsRequest.class))
+//        {
+//            executeNewPointsRequest((NewPointsRequest) request);
+//        }
+//        else if (request.getClass().equals(EndPathRequest.class))
+//        {
+//            executeEndPathRequest((EndPathRequest) request);
+//        }
+//    }
+//
+//    static private void executeNewPathRequest(NewPathRequest request)
+//    {
+//        System.out.println("NewPath: "+request.getColor());
+//    }
+//
+//    static private void executeNewPointsRequest(NewPointsRequest request)
+//    {
+//        System.out.println("NewPoint: "+request.getPoints());
+//    }
+//
+//    static private void executeEndPathRequest(EndPathRequest request)
+//    {
+//    }
 }
