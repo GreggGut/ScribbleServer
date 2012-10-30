@@ -12,16 +12,18 @@ public class UndoRequest implements Request
 {
 
     @Override
-    public int getRequestID()
+    public Integer getRequestID()
     {
         return requestID;
     }
     private int requestID;
     private int pathID;
+    private int page;
 
-    public UndoRequest(int requestID, int pathID)
+    UndoRequest(int requestID, int page, int pathID)
     {
-        this.requestID=requestID;
-        this.pathID=pathID;
+        this.requestID = requestID;
+        this.page = page;
+        this.pathID = pathID;
     }
 }

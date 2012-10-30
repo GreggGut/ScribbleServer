@@ -12,7 +12,7 @@ public class NewPathRequest implements Request
 {
 
     @Override
-    public int getRequestID()
+    public Integer getRequestID()
     {
         return requestID;
     }

@@ -4,11 +4,13 @@
  */
 package scribbleserver_0.pkg01;
 
+import java.util.Vector;
+
 /**
  *
  * @author Grzegorz Gut <Gregg.Gut@gmail.com>
  */
-public class LogoutRequest implements Request
+public class GetFileListRequest implements Request
 {
 
     @Override
@@ -17,20 +19,16 @@ public class LogoutRequest implements Request
         return requestID;
     }
     private int requestID;
-    private boolean completed = false;
+    Vector<SCFile> mFiles;
 
-    LogoutRequest(int requestID)
+    GetFileListRequest(int requestID, Vector<SCFile> mFiles)
     {
         this.requestID = requestID;
+        this.mFiles = mFiles;
     }
 
-    public void setAsCompleted()
+    public Vector<SCFile> getmFiles()
     {
-        completed = true;
-    }
-
-    public boolean isCompleted()
-    {
-        return completed;
+        return mFiles;
     }
 }

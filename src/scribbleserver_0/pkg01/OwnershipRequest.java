@@ -12,15 +12,14 @@ public class OwnershipRequest implements Request
 {
 
     @Override
-    public int getRequestID()
+    public Integer getRequestID()
     {
         return requestID;
     }
     private int requestID;
 
-    public OwnershipRequest(int requestID)
+    OwnershipRequest(int requestID)
     {
         this.requestID = requestID;
-    }    
-    
+    }
 }

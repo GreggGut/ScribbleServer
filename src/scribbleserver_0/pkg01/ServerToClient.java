@@ -17,7 +17,7 @@ public class ServerToClient
     public static final int serverPort = 54555;
     //Transmission protocol
     public static final int logInSuccessful = 0;
-    public static final int logInFailed = 1;
+    public static final int logInFailedWrongPassword = 1;
     public static final int logOutSuccessful = 2;
     public static final int logOutFailed = 3;
     public static final int allowOwnership = 4;
@@ -31,7 +31,8 @@ public class ServerToClient
     public static final int fileListAvailable = 12;
     public static final int periodicAliveCheck = 13;
     public static final int noOwnerOfFile = 14;
-    public static final int usernameAlreadyLoggedIn = 15;
+    public static final int logInFailedUsernameAlreadyLoggedIn = 15;
     public static final int ownershipTakenSuccessfully=16;
     public static final int ownershipTakenFailed=17;
+    //public static final int loginFailedWrongPassword=18;
 }

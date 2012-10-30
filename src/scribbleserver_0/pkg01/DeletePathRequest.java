@@ -1,10 +1,14 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
 package scribbleserver_0.pkg01;
 
 /**
  *
  * @author Grzegorz Gut <Gregg.Gut@gmail.com>
  */
-public class EndPathRequest implements Request
+public class DeletePathRequest implements Request
 {
 
     @Override
@@ -12,14 +16,14 @@ public class EndPathRequest implements Request
     {
         return requestID;
     }
-
-    private boolean completed = false;
     private int requestID;
     private int pathID;
+    private int page;
 
-    public EndPathRequest(int requestID, int pathID)
+    DeletePathRequest(int requestID, int page, int pathID)
     {
         this.requestID = requestID;
+        this.page = page;
         this.pathID = pathID;
     }
 }

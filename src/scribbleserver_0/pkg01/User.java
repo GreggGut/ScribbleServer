@@ -6,6 +6,8 @@ package scribbleserver_0.pkg01;
 
 import java.net.InetAddress;
 import java.util.Vector;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -21,9 +23,9 @@ public class User
     private SCFile activeFile;
     private boolean ownership = false;
     private boolean loggedIn = false;
-    private Page workingPage;
-    private SCFile workingFile;
-    private int currentRequestID;
+    //private SCFile workingFile;
+    private Path workingPath;
+    //private int currentRequestID;
     private Vector<Request> mRequests = new Vector<Request>();
     private RequestAnalyser analyser;
     private int requestID;
@@ -35,13 +37,14 @@ public class User
      * @param add
      * @param p
      */
-    User(String n, String pass, InetAddress add, int p, int requestID)
+    User(String n, String pass, InetAddress add, int p, int requestID, SCFile fi)
     {
         name = n;
         address = add;
         password = pass;
         port = p;
         this.requestID = requestID;
+        this.activeFile=fi;
     }
 
     public boolean login()
@@ -53,6 +56,7 @@ public class User
         //This will need to check a database, make sure the user/password combination is good and then login/fail the users
         loggedIn = true;
         analyser = new RequestAnalyser(mRequests, this, requestID);
+        new Thread(analyser).start();
 
         return true;
     }
@@ -66,7 +70,17 @@ public class User
             {
                 activeFile.setPresentOwner(null);
             }
-            //ownership=false;
+            analyser.stopThread();
+
+            try
+            {
+                //waiting for the thread to finish
+                analyser.wait();
+            }
+            catch (InterruptedException ex)
+            {
+                Logger.getLogger(User.class.getName()).log(Level.SEVERE, null, ex);
+            }
 
             System.out.println(name + " logged out!");
 
@@ -115,28 +129,28 @@ public class User
         return port;
     }
 
-    public void setWorkingPage(Page workingPage)
-    {
-        this.workingPage = workingPage;
-    }
-
-    public Page getWorkingPage()
-    {
-        return workingPage;
-    }
-
-    public void setWorkingFile(SCFile workingFile)
-    {
-        this.workingFile = workingFile;
-    }
-
-    public SCFile getWorkingFile()
-    {
-        return workingFile;
-    }
+//    public void setWorkingFile(SCFile workingFile)
+//    {
+//        this.workingFile = workingFile;
+//    }
+//
+//    public SCFile getWorkingFile()
+//    {
+//        return workingFile;
+//    }
 
     public void addRequest(Request r)
     {
         mRequests.add(r);
+    }
+
+    public Path getWorkingPath()
+    {
+        return workingPath;
+    }
+
+    public void setWorkingPath(Path workingPath)
+    {
+        this.workingPath = workingPath;
     }
 }

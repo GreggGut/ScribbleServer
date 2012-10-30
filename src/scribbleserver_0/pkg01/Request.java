@@ -11,5 +11,5 @@ package scribbleserver_0.pkg01;
 public interface Request
 {
 
-    public int getRequestID();
+    public Integer getRequestID();
 }

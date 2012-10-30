@@ -12,16 +12,18 @@ public class RedoRequest implements Request
 {
 
     @Override
-    public int getRequestID()
+    public Integer getRequestID()
     {
         return requestID;
     }
     private int requestID;
     private int pathID;
+    private int page;
 
-    public RedoRequest(int requestID, int pathID)
+    RedoRequest(int requestID, int page, int pathID)
     {
         this.requestID = requestID;
+        this.page = page;
         this.pathID = pathID;
     }
 }

@@ -66,9 +66,9 @@ public class PacketAnalyzer implements Runnable
                         try
                         {
                             int port = Integer.parseInt(info[4]);
-                            int requestID = Integer.parseInt(info[2]);                   
-                            
-                            User user = new User(info[1], info[3], clientAddress, port, requestID);
+                            int requestID = Integer.parseInt(info[2]);
+
+                            User user = new User(info[1], info[3], clientAddress, port, requestID, mFiles.get(0));
 
                             boolean userExists = false;
                             //allowing unique usernames to be logged in simultaniously
@@ -78,7 +78,7 @@ public class PacketAnalyzer implements Runnable
                                 {
                                     userExists = true;
                                     //User already exists, cannot login
-                                /*
+                                    /*
                                      * Send login fail, user already logged in message
                                      * Test if user is still logged in by testing the connection
                                      * if user does not respond, remove user from the list
@@ -93,17 +93,26 @@ public class PacketAnalyzer implements Runnable
                                 if (user.login())
                                 {
                                     mUsers.add(user);
+
+                                    String toSend = "";
+                                    toSend += ServerToClient.logInSuccessful;
+                                    toSend += HELPER.split;
+
+                                    HELPER.send(toBeAnalyzed, user.getAddress(), user.getPort());
                                 }
                                 else
                                 {
+                                    String toSend = "";
+                                    toSend += ServerToClient.logInFailedWrongPassword;
+                                    toSend += HELPER.split;
+
+                                    HELPER.send(toSend, user.getAddress(), user.getPort());
                                 }
                             }
                             else
                             {
                                 String toSend = "";
-                                toSend += ServerToClient.logInFailed;
-                                toSend += HELPER.split;
-                                toSend += ServerToClient.usernameAlreadyLoggedIn;
+                                toSend += ServerToClient.logInFailedUsernameAlreadyLoggedIn;
                                 toSend += HELPER.split;
 
                                 HELPER.send(toSend, user.getAddress(), user.getPort());
@@ -113,9 +122,6 @@ public class PacketAnalyzer implements Runnable
                         {
                             //if the port fails to be translated into a number we cannot do anything and therefore we drop this request
                         }
-
-                        //String name, String password, InetAddress address, int port
-
                     }
                     break;
 
@@ -145,14 +151,10 @@ public class PacketAnalyzer implements Runnable
                                         {
                                         }
                                     }
-                                    //The logout will be done within the request
-                                    //if (mUsers.elementAt(i).logout())
-                                    {
-                                        mUsers.remove(i);
-                                        String toSend = "";
-                                        toSend += ServerToClient.logOutSuccessful;
-                                        HELPER.send(toSend, clientAddress, ServerToClient.serverPort);
-                                    }
+                                    //Once the request has been completed we can remove the user from the list
+                                    mUsers.remove(i);
+                                    
+                                    System.out.println("User logout and removed");
 
                                     break;
                                 }
@@ -188,6 +190,8 @@ public class PacketAnalyzer implements Runnable
 
                                     OwnershipRequest request = new OwnershipRequest(requestID);
                                     user.addRequest(request);
+                                    
+                                    System.out.println("OwnershipRequest request placed");
                                     break;
                                 }
                             }
@@ -195,7 +199,6 @@ public class PacketAnalyzer implements Runnable
                         catch (Exception x)
                         {
                         }
-
                     }
 
                     break;
@@ -215,7 +218,8 @@ public class PacketAnalyzer implements Runnable
                                 {
                                     ReleaseOwnershipRequest request = new ReleaseOwnershipRequest(requestID);
                                     user.addRequest(request);
-
+                                    System.out.println("ReleaseOwnershipRequest request placed");
+                                    
                                     break;
                                 }
                             }
@@ -223,26 +227,38 @@ public class PacketAnalyzer implements Runnable
                         catch (NumberFormatException x)
                         {
                         }
-
                     }
 
                     break;
 
                 case 4:
                     //Get file list
-                    //getFileList
-                    String toBeSend = "";
-                    toBeSend += ServerToClient.fileListAvailable;
-                    toBeSend += HELPER.split;
-
-                    for (SCFile file : mFiles)
+                    //getFileList - username - requestID
+                    if (info.length > 2)
                     {
-                        toBeSend += file.getName();
-                        toBeSend += HELPER.split;
+                        try
+                        {
+                            String username = info[1];
+                            int requestID = Integer.parseInt(info[2]);
+
+                            for (User user : mUsers)
+                            {
+                                if (user.getName().equals(username) && user.getAddress().equals(clientAddress))
+                                {
+                                    //We find the user who placed the request
+                                    GetFileListRequest request = new GetFileListRequest(requestID, mFiles);
+                                    user.addRequest(request);
+                                    System.out.println("GetFileListRequest request placed");
+                                    
+                                    break;
+                                }
+                            }
+                        }
+                        catch (NumberFormatException x)
+                        {
+                        }
                     }
 
-                    //Send file list to client
-                    HELPER.send(toBeSend, clientAddress, ServerToClient.serverPort);
                     break;
 
                 case 5:
@@ -253,57 +269,55 @@ public class PacketAnalyzer implements Runnable
                     //New Path
                     //newPath - username - requestID - pathID - mode - color - active - page
 
-                    //find the user who is sending this
-                    SCFile mfile = null;
-                    User currentUser = null;
-                    for (User user : mUsers)
+                    if (info.length > 7)
                     {
-                        if (user.getName().equals(info[1]) && user.getAddress().equals(clientAddress))
-                        {
-                            mfile = user.getActiveFile();
-                            currentUser = user;
-                            break;
-                        }
-                    }
-
-                    if (mfile != null && currentUser != null)
-                    {
-                        //Create new path for the user decument
-                        //(int id, boolean mode, int color, boolean active)
                         try
                         {
+                            //Parsing all the received info
+                            String username = info[1];
                             int requestID = Integer.parseInt(info[2]);
                             int pathID = Integer.parseInt(info[3]);
                             boolean mode;
-                            if (info[4].equals("0"))
-                            {
-                                mode = false;
-                            }
+                            if (info[4].equals("1"))
                             {
                                 mode = true;
                             }
+                            else
+                            {
+                                mode = false;
+                            }
                             int color = Integer.parseInt(info[5]);
                             boolean active;
-                            if (info[6].equals("0"))
-                            {
-                                active = false;
-                            }
+                            if (info[6].equals("1"))
                             {
                                 active = true;
                             }
-
+                            else
+                            {
+                                active = false;
+                            }
                             int page = Integer.parseInt(info[7]);
 
-                            Path p = new Path(pathID, mode, color, active);
+                            for (User user : mUsers)
+                            {
+                                if (user.getName().equals(username) && user.getAddress().equals(clientAddress))
+                                {
+                                    NewPathRequest request = new NewPathRequest(requestID, pathID, mode, color, active, page);
+                                    user.addRequest(request);
+                                    
+                                    System.out.println("NewPathRequest request placed");
 
-                            mfile.getmPages().get(page).addPath(p);
-                            currentUser.setWorkingPage(mfile.getmPages().get(page));
-
+                                    //to be broadcasted:
+                                    //For now we are sending the request exactly as it came to us
+                                    //TOCONFIRM Maybe we should have a new request numbering
+                                    broadcastRequest(user, toBeAnalyzed);
+                                    break;
+                                }
+                            }
                         }
-                        catch (Exception e)
+                        catch (NumberFormatException x)
                         {
                         }
-
                     }
 
                     //byte[] infos = info.getBytes();                    
@@ -311,25 +325,206 @@ public class PacketAnalyzer implements Runnable
 
                 case 7:
                     //Add point to path
+                    //AddPoints - username - requestID - pathID - numberOfPoints - Points
+
+                    if (info.length > 5)
+                    {
+                        try
+                        {
+                            String username = info[1];
+                            int requestID = Integer.parseInt(info[2]);
+                            int pathID = Integer.parseInt(info[3]);
+                            int numberOfPoints = Integer.parseInt(info[4]);
+                            String points = info[5];
+
+                            for (User user : mUsers)
+                            {
+                                if (user.getName().equals(username) && user.getAddress().equals(clientAddress))
+                                {
+                                    AddPointsRequest request = new AddPointsRequest(requestID, pathID, numberOfPoints, points);
+                                    user.addRequest(request);
+
+                                    System.out.println("AddPointsRequest request placed");
+                                    
+                                    //to be broadcasted:
+                                    //For now we are sending the request exactly as it came to us
+                                    //TOCONFIRM Maybe we should have a new request numbering
+                                    broadcastRequest(user, toBeAnalyzed);
+                                    break;
+                                }
+                            }
+                        }
+                        catch (NumberFormatException x)
+                        {
+                        }
+                    }
+
                     break;
 
                 case 8:
                     //End current path
+                    //EndPath - username - requestID - pathID
+                    if (info.length > 3)
+                    {
+                        try
+                        {
+                            String username = info[1];
+                            int requestID = Integer.parseInt(info[2]);
+                            int pathID = Integer.parseInt(info[3]);
+
+                            for (User user : mUsers)
+                            {
+                                if (user.getName().equals(username) && user.getAddress().equals(clientAddress))
+                                {
+                                    EndPathRequest request = new EndPathRequest(requestID, pathID);
+                                    user.addRequest(request);
+
+                                    System.out.println("EndPathRequest request placed");
+                                    
+                                    //to be broadcasted:
+                                    //For now we are sending the request exactly as it came to us
+                                    //TOCONFIRM Maybe we should have a new request numbering
+                                    broadcastRequest(user, toBeAnalyzed);
+                                    break;
+                                }
+                            }
+                        }
+                        catch (NumberFormatException x)
+                        {
+                        }
+                    }
                     break;
 
                 case 9:
                     //undo last action
+                    //Undo - username - requestID - page - pathID
+                    if (info.length > 4)
+                    {
+                        try
+                        {
+                            String username = info[1];
+                            int requestID = Integer.parseInt(info[2]);
+                            int page = Integer.parseInt(info[3]);
+                            int pathID = Integer.parseInt(info[4]);
+
+                            for (User user : mUsers)
+                            {
+                                if (user.getName().equals(username) && user.getAddress().equals(clientAddress))
+                                {
+                                    UndoRequest request = new UndoRequest(requestID, page, pathID);
+                                    user.addRequest(request);
+
+                                    System.out.println("UndoRequest request placed");
+                                    
+                                    //to be broadcasted:
+                                    //For now we are sending the request exactly as it came to us
+                                    //TOCONFIRM Maybe we should have a new request numbering
+                                    broadcastRequest(user, toBeAnalyzed);
+
+                                    break;
+                                }
+                            }
+
+                        }
+                        catch (NumberFormatException x)
+                        {
+                        }
+                    }
                     break;
 
                 case 10:
                     //redo last action
+                    //Redo - username - requestID - page - pathID
+                    if (info.length > 4)
+                    {
+                        try
+                        {
+                            String username = info[1];
+                            int requestID = Integer.parseInt(info[2]);
+                            int page = Integer.parseInt(info[3]);
+                            int pathID = Integer.parseInt(info[4]);
+
+                            for (User user : mUsers)
+                            {
+                                if (user.getName().equals(username) && user.getAddress().equals(clientAddress))
+                                {
+                                    RedoRequest request = new RedoRequest(requestID, page, pathID);
+                                    user.addRequest(request);
+
+                                    System.out.println("RedoRequest request placed");
+                                    
+                                    //to be broadcasted:
+                                    //For now we are sending the request exactly as it came to us
+                                    //TOCONFIRM Maybe we should have a new request numbering
+                                    broadcastRequest(user, toBeAnalyzed);
+
+                                    break;
+                                }
+                            }
+
+                        }
+                        catch (NumberFormatException x)
+                        {
+                        }
+                    }
                     break;
 
                 case 11:
                     //delete path
+                    //TOCONFIRM How will we implement the delete function?
+                    //Delete - username - requestID - page - pathID
+
+                    if (info.length > 4)
+                    {
+                        try
+                        {
+                            String username = info[1];
+                            int requestID = Integer.parseInt(info[2]);
+                            int page = Integer.parseInt(info[3]);
+                            int pathID = Integer.parseInt(info[4]);
+
+                            for (User user : mUsers)
+                            {
+                                if (user.getName().equals(username) && user.getAddress().equals(clientAddress))
+                                {
+                                    DeletePathRequest request = new DeletePathRequest(requestID, page, pathID);
+                                    user.addRequest(request);
+
+                                    System.out.println("DeletePathRequest request placed");
+                                    
+                                    //to be broadcasted:
+                                    //For now we are sending the request exactly as it came to us
+                                    //TOCONFIRM Maybe we should have a new request numbering
+                                    broadcastRequest(user, toBeAnalyzed);
+
+                                    break;
+                                }
+                            }
+                        }
+                        catch (NumberFormatException x)
+                        {
+                        }
+                    }
                     break;
             }
-
         }
+    }
+
+    /**
+     * Broadcast function. A request is forwarded to all
+     *
+     * @param exclude To which user we should not send this message
+     * @param message The message that needs to be send
+     */
+    private void broadcastRequest(User exclude, String message)
+    {
+        for (User user : mUsers)
+        {
+            if (!user.equals(exclude))
+            {
+                HELPER.send(message, user.getAddress(), user.getPort());
+            }
+        }
+
     }
 }

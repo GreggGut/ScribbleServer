@@ -5,6 +5,7 @@
 package scribbleserver_0.pkg01;
 
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Vector;
 
 /**
@@ -15,13 +16,13 @@ public class RequestAnalyser implements Runnable
 {
 
     private boolean run = true;
-    private Vector<Request> mRequest;
+    private Vector<Request> mRequests;
     private User user;
     private int lastRequestCompleted;
 
     RequestAnalyser(Vector<Request> mRequest, User user, int lastRequestCompleted)
     {
-        this.mRequest = mRequest;
+        this.mRequests = mRequest;
         this.user = user;
         this.lastRequestCompleted = lastRequestCompleted;
     }
@@ -31,21 +32,24 @@ public class RequestAnalyser implements Runnable
     {
         while (run)
         {
-            for (int i = 0; i < mRequest.size(); i++)
+            // Sorting by request ID             
+            Collections.sort(mRequests, new SortByRequestID());
+
+            for (int i = 0; i < mRequests.size(); i++)
             {
                 //If this request is the next request that needs to be completed
-                if (mRequest.get(i).getRequestID() == (lastRequestCompleted + 1))
+                if (mRequests.get(i).getRequestID() == (lastRequestCompleted + 1))
                 {
-                    executeRequest(mRequest.get(i));
-                    mRequest.set(i, null);
-                    lastRequestCompleted++;
+                    executeRequest(mRequests.get(i));
+                    lastRequestCompleted = mRequests.get(i).getRequestID();
+                    mRequests.set(i, null);
                 }
             }
 
-            mRequest.removeAll(Collections.singleton(null));
+            mRequests.removeAll(Collections.singleton(null));
 
-            mRequest.removeAll(Collections.singletonList(null));
-            if (!mRequest.isEmpty())
+            mRequests.removeAll(Collections.singletonList(null));
+            if (!mRequests.isEmpty())
             {
             }
 
@@ -61,7 +65,7 @@ public class RequestAnalyser implements Runnable
 
     public boolean areRequestPending()
     {
-        return !mRequest.isEmpty();
+        return !mRequests.isEmpty();
     }
 
     public void stopThread()
@@ -74,10 +78,6 @@ public class RequestAnalyser implements Runnable
         if (request.getClass().equals(NewPathRequest.class))
         {
             executeNewPathRequest((NewPathRequest) request);
-        }
-        else if (request.getClass().equals(NewPointsRequest.class))
-        {
-            executeNewPointsRequest((NewPointsRequest) request);
         }
         else if (request.getClass().equals(EndPathRequest.class))
         {
@@ -103,34 +103,80 @@ public class RequestAnalyser implements Runnable
         {
             executeReleaseOwnershipRequest((ReleaseOwnershipRequest) request);
         }
+        else if (request.getClass().equals(GetFileListRequest.class))
+        {
+            executeGetFileListRequest((GetFileListRequest) request);
+        }
+        else if (request.getClass().equals(AddPointsRequest.class))
+        {
+            executeAddPointsRequest((AddPointsRequest) request);
+        }
+        else if (request.getClass().equals(DeletePathRequest.class))
+        {
+            executeDeletePathRequest((DeletePathRequest) request);
+        }
+    }
+
+    /**
+     * Comparator used to sort the request by ID, from smaller (first) to larger (last)
+     */
+    public class SortByRequestID implements Comparator<Request>
+    {
+
+        @Override
+        public int compare(Request o1, Request o2)
+        {
+            return o1.getRequestID().compareTo(o2.getRequestID());
+        }
     }
 
     private void executeNewPathRequest(NewPathRequest request)
     {
-    }
+        System.out.println("executeNewPathRequest");
+        Path path = new Path(request.getPathID(), request.isMode(), request.getColor(), request.isActive());
 
-    private void executeNewPointsRequest(NewPointsRequest request)
-    {
+        //Adding new path to the 
+        //We have to make user the user cannot add new paths before he/she has chosen a file to work on
+        user.getActiveFile().getmPages().get(request.getPage()).addPath(path);
+
+        //Adding the path to the user cirrent working path
+        user.setWorkingPath(path);
     }
 
     private void executeEndPathRequest(EndPathRequest request)
     {
+        System.out.println("executeEndPathRequest");
+        //Is there a better was to do it???
+        user.setWorkingPath(null);
     }
 
     private void executeUndoRequest(UndoRequest request)
     {
+        System.out.println("executeUndoRequest");
+        //TODO implement Undo Request
     }
 
     private void executeRedoRequest(RedoRequest request)
     {
+        System.out.println("executeRedoRequest");
+        //TODO implement Redo Request 
     }
 
     private void executeLogoutRequest(LogoutRequest request)
     {
+        System.out.println("executeLogoutRequest");
+        user.logout();
+        String toSend = "";
+        toSend += ServerToClient.logOutSuccessful;
+        HELPER.send(toSend, user.getAddress(), user.getPort());
+
+        //Once we are done with this we set it as completed
+        request.setAsCompleted();
     }
 
     private void executeOwnershipRequest(OwnershipRequest request)
     {
+        System.out.println("executeOwnershipRequest");
         //Making sure there is no owner
         if (user.getActiveFile().getPresentOwner() == null)
         {
@@ -161,6 +207,7 @@ public class RequestAnalyser implements Runnable
 
     private void executeReleaseOwnershipRequest(ReleaseOwnershipRequest request)
     {
+        System.out.println("executeReleaseOwnershipRequest");
         user.setOwnership(false);
         user.getActiveFile().setPresentOwner(null);
 
@@ -175,5 +222,35 @@ public class RequestAnalyser implements Runnable
         {
             HELPER.send(toSend, allUsers.getAddress(), allUsers.getPort());
         }
+    }
+
+    private void executeGetFileListRequest(GetFileListRequest request)
+    {
+        System.out.println("executeGetFileListRequest");
+        String toBeSend = "";
+        toBeSend += ServerToClient.fileListAvailable;
+        toBeSend += HELPER.split;
+
+        for (SCFile file : request.getmFiles())
+        {
+            toBeSend += file.getName();
+            toBeSend += HELPER.split;
+        }
+
+        //Send file list to client
+        HELPER.send(toBeSend, user.getAddress(), user.getPort());
+    }
+
+    private void executeAddPointsRequest(AddPointsRequest request)
+    {
+        System.out.println("executeAddPointsRequest");
+        //TODO convert the string of points into real points
+        //request.getPoints().get       
+    }
+
+    private void executeDeletePathRequest(DeletePathRequest request)
+    {
+        System.out.println("executeDeletePathRequest");
+        //TODO implement the detele path request... this will depend on how we implement the delete function on Scribble
     }
 }
