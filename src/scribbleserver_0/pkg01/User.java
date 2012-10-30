@@ -25,6 +25,8 @@ public class User
     private SCFile workingFile;
     private int currentRequestID;
     private Vector<Request> mRequests = new Vector<Request>();
+    private RequestAnalyser analyser;
+    private int requestID;
 
     /**
      *
@@ -33,12 +35,13 @@ public class User
      * @param add
      * @param p
      */
-    User(String n, String pass, InetAddress add, int p)
+    User(String n, String pass, InetAddress add, int p, int requestID)
     {
         name = n;
         address = add;
         password = pass;
         port = p;
+        this.requestID = requestID;
     }
 
     public boolean login()
@@ -49,6 +52,7 @@ public class User
 
         //This will need to check a database, make sure the user/password combination is good and then login/fail the users
         loggedIn = true;
+        analyser = new RequestAnalyser(mRequests, this, requestID);
 
         return true;
     }

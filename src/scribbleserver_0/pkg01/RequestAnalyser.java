@@ -99,6 +99,10 @@ public class RequestAnalyser implements Runnable
         {
             executeOwnershipRequest((OwnershipRequest) request);
         }
+        else if (request.getClass().equals(ReleaseOwnershipRequest.class))
+        {
+            executeReleaseOwnershipRequest((ReleaseOwnershipRequest) request);
+        }
     }
 
     private void executeNewPathRequest(NewPathRequest request)
@@ -127,5 +131,49 @@ public class RequestAnalyser implements Runnable
 
     private void executeOwnershipRequest(OwnershipRequest request)
     {
+        //Making sure there is no owner
+        if (user.getActiveFile().getPresentOwner() == null)
+        {
+            user.getActiveFile().setPresentOwner(user);
+            user.setOwnership(true);
+
+            String toSend = "";
+            toSend += ServerToClient.ownershipTakenSuccessfully;
+            toSend += HELPER.split;
+            toSend += user.getName();
+            toSend += HELPER.split;
+            //Informing all users that the file ownership has been taken
+            for (User allUsers : user.getActiveFile().getmActiveUsers())
+            {
+                HELPER.send(toSend, allUsers.getAddress(), allUsers.getPort());
+            }
+        }
+        else
+        {
+            //Ownership already taken
+            String toSend = "";
+            toSend += ServerToClient.ownershipTakenFailed;
+            toSend += HELPER.split;
+
+            HELPER.send(toSend, user.getAddress(), user.getPort());
+        }
+    }
+
+    private void executeReleaseOwnershipRequest(ReleaseOwnershipRequest request)
+    {
+        user.setOwnership(false);
+        user.getActiveFile().setPresentOwner(null);
+
+        /*
+         * Broadcast to all that the ownership is free
+         */
+        String toSend = "";
+        toSend += ServerToClient.noOwnerOfFile;
+        toSend += HELPER.split;
+
+        for (User allUsers : user.getActiveFile().getmActiveUsers())
+        {
+            HELPER.send(toSend, allUsers.getAddress(), allUsers.getPort());
+        }
     }
 }

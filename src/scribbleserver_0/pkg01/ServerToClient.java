@@ -32,5 +32,6 @@ public class ServerToClient
     public static final int periodicAliveCheck = 13;
     public static final int noOwnerOfFile = 14;
     public static final int usernameAlreadyLoggedIn = 15;
-    public static final int ownershipTaken=16;
+    public static final int ownershipTakenSuccessfully=16;
+    public static final int ownershipTakenFailed=17;
 }

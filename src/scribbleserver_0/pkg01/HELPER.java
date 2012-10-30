@@ -22,6 +22,7 @@ public class HELPER
 
     public static int MESSAGESIZE = 300;
     public static long delay = 5 * 60 * 1000;    //5 minnute delay
+    public static String split = "---";
 
     /*
      * Item ID used by the offer function
