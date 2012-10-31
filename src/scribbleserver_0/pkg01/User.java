@@ -23,9 +23,7 @@ public class User
     private SCFile activeFile;
     private boolean ownership = false;
     private boolean loggedIn = false;
-    //private SCFile workingFile;
     private Path workingPath;
-    //private int currentRequestID;
     private Vector<Request> mRequests = new Vector<Request>();
     private RequestAnalyser analyser;
     private int requestID;
@@ -128,16 +126,6 @@ public class User
     {
         return port;
     }
-
-//    public void setWorkingFile(SCFile workingFile)
-//    {
-//        this.workingFile = workingFile;
-//    }
-//
-//    public SCFile getWorkingFile()
-//    {
-//        return workingFile;
-//    }
 
     public void addRequest(Request r)
     {

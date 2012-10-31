@@ -46,9 +46,10 @@ public class RequestAnalyser implements Runnable
                 }
             }
 
+            //Collections.singletonList returns a list, Collections.singleton seturn a set (no duplicates)
             mRequests.removeAll(Collections.singleton(null));
 
-            mRequests.removeAll(Collections.singletonList(null));
+            //mRequests.removeAll(Collections.singletonList(null));
             if (!mRequests.isEmpty())
             {
             }
