@@ -20,6 +20,13 @@ public class UndoRequest implements Request
     private int pathID;
     private int page;
 
+    /**
+     * Default constructor
+     *
+     * @param requestID The ID of the current request
+     * @param page The page on which we want to Undo the last action
+     * @param pathID The ID of the path we want to Undo
+     */
     UndoRequest(int requestID, int page, int pathID)
     {
         this.requestID = requestID;

@@ -20,44 +20,28 @@ import java.util.Vector;
 public class HELPER
 {
 
-    public static int MESSAGESIZE = 300;
-    public static long delay = 5 * 60 * 1000;    //5 minnute delay
-    public static String split = "---";
+    /**
+     * User to split the info received from the clients
+     */
+    public static String split = "/n";
+    /**
+     * Used to split the points received from the clients
+     */
+    public static String splitPoints = "#";
 
-    /*
-     * Item ID used by the offer function
+    /**
+     * Static function that allows the server to send messages to the clients
+     *
+     * @param toSend Message to be send to a user
+     * @param clientAddress User Address (IP)
+     * @param clientPort User listening port
      */
-    public static int ItemID = 0;
-    /*
-     * Used when reading/writing to the user Array
-     */
-//    private static final ReentrantReadWriteLock readWriteUserLock = new ReentrantReadWriteLock();
-//    public static Lock readUsersList = readWriteUserLock.readLock();
-//    public static Lock writeUsersList = readWriteUserLock.writeLock();
-//    /*
-//     * Used when reading/writing to the user Array     * 
-//     */
-//    private static final ReentrantReadWriteLock readWriteItemsLock = new ReentrantReadWriteLock();
-//    public static Lock readItemsList = readWriteItemsLock.readLock();
-//    public static Lock writeItemsList = readWriteItemsLock.writeLock();
-//    /*
-//     * Used when writing to the users.txt file
-//     */
-//    static final private ReentrantReadWriteLock userFileLock = new ReentrantReadWriteLock();
-//    static public Lock writeUserFile = userFileLock.writeLock();
-//    /*
-//     * Used when writing to the itmes.txt file
-//     */
-//    static final private ReentrantReadWriteLock itemFileLock = new ReentrantReadWriteLock();
-//    static public Lock writeItemsFile = itemFileLock.writeLock();
-    /*
-     * Function used to send data to different users through a UDP socket
-     */
-
     synchronized static void send(String toSend, InetAddress clientAddress, int clientPort)
     {
         int counter = 0;
-        //Sending function, will get repeated up to 5 times in case of failures
+        /*
+         * Sending function, will get repeated up to 5 times in case of failures
+         */
         boolean failedSending = true;
         while (counter < 5)
         {
@@ -97,34 +81,46 @@ public class HELPER
 
         if (failedSending)
         {
-            System.out.println("Failed sending... ");
+            //TESTING
+            System.out.println("Failed sending... <---------------------------");
+        }
+        else
+        {
+            //TESTING
+            System.out.println("------------------->Send completed<---------------------------");
         }
     }
 
     /**
      * Function that finds all the files in a directory
      *
-     * @param mFiles - Vector of SCFile that will be filled with the files available to all users
+     * @param mFiles Vector of SCFile that will be filled with the files available to all users
      */
     static void getAllFiles(Vector<SCFile> mFiles)
     {
-        // Directory path here
+        /**
+         * The folder where all the files are present, as seen from this application
+         */
         String path = "documents";
 
         File folder = new File(path);
         File[] listOfFiles = folder.listFiles();
 
-        //sorting the files in alphabetical order
+        /**
+         * sorting the files in alphabetical order
+         */
         Arrays.sort(listOfFiles);
 
-        for (File file : listOfFiles)//int i = 0; i < listOfFiles.length; i++)
+        for (File file : listOfFiles)
         {
 
             if (file.isFile())
             {
-                SCFile newFile = new SCFile(file.getName(), file.getPath());
-                mFiles.add(newFile);
+                //TODO Need to find a way how many pages the document has, for now using 10
+                int nPages = 10;
+                SCFile newFile = new SCFile(file.getName(), file.getPath(), nPages);
 
+                mFiles.add(newFile);
                 System.out.println(file.getName() + " " + file.getPath());
             }
         }
