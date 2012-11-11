@@ -296,8 +296,19 @@ public class RequestAnalyser implements Runnable
             String toSend = "";
             toSend += ServerToClient.ALLOW_OWNERSHIP;
             toSend += HELPER.split;
+
             toSend += user.getName();
             toSend += HELPER.split;
+
+            toSend += request.getRequestID();
+            toSend += HELPER.split;
+
+            /**
+             * The request ID will be used by the receivers to know where to start their expected request ID
+             */
+            toSend += request.getRequestID();
+            toSend += HELPER.split;
+
             /**
              * Informing all users that the file ownership has been taken, including the requesting user
              */
@@ -356,7 +367,7 @@ public class RequestAnalyser implements Runnable
     {
         System.out.println("executeGetFileListRequest");
         String toBeSend = "";
-        toBeSend += ServerToClient.FILE_LIAST_AVAILABLE;
+        toBeSend += ServerToClient.FILE_LIST_AVAILABLE;
         toBeSend += HELPER.split;
 
         /**

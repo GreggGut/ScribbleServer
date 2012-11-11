@@ -194,7 +194,13 @@ public class PacketAnalyzer implements Runnable
                                      * Once the request has been completed we can remove the user from the list
                                      */
                                     mUsers.remove(i);
-                                    System.out.println("User logout and removed");
+                                    System.out.println("User logout and removed\nUsers logged in:");
+                                    
+                                    for(User user:mUsers)
+                                    {
+                                        System.out.println("User: "+user.getName()+" "+user.getAddress());
+                                    }
+                                    
 
                                     break;
                                 }
@@ -694,8 +700,11 @@ public class PacketAnalyzer implements Runnable
      */
     private void broadcastRequest(User exclude, String message)
     {
+        //TESTING exclude = null; shouldn't be.. it is only used for testing
+        exclude = null;
         for (User user : mUsers)
         {
+
             if (!user.equals(exclude))
             {
                 HELPER.send(message, user.getAddress(), user.getPort());

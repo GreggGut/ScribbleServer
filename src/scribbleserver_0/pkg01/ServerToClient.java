@@ -27,7 +27,7 @@ public class ServerToClient
     public static final int UNDO_LAST_ACTION = 9;
     public static final int REDO_LAST_ACTION = 10;
     public static final int DELETE_PATH = 11;
-    public static final int FILE_LIAST_AVAILABLE = 12;
+    public static final int FILE_LIST_AVAILABLE = 12;
     public static final int PERIODIC_ALIVE_CHECK = 13;
     public static final int OWNERSHIP_IS_AVAILABLE = 14;
     public static final int LOG_IN_FAIL_USER_ALREADY_LOGGED_IN = 15;

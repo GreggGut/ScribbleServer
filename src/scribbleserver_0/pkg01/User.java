@@ -90,10 +90,16 @@ public class User
              * Setting loggedIn to false and
              */
             loggedIn = false;
-            if (activeFile != null && activeFile.getPresentOwner() != null && activeFile.getPresentOwner().equals(this))
+            if (activeFile != null && activeFile.getPresentOwner() != null )
             {
-                activeFile.setPresentOwner(null);
+                getActiveFile().removeUser(this);
+                if(activeFile.getPresentOwner().equals(this))
+                {
+                    activeFile.setPresentOwner(null);
+                }
+                
             }
+            
 
             /**
              * This interrupts the Request analyzer thread since it is no longer needed

@@ -23,7 +23,7 @@ public class HELPER
     /**
      * User to split the info received from the clients
      */
-    public static String split = "/n";
+    public static String split = "&";
     /**
      * Used to split the points received from the clients
      */
@@ -61,7 +61,7 @@ public class HELPER
             {
                 counter++;
 
-                System.out.println("Cannot connect to server... retrying");
+                System.out.println("Cannot connect to server... retrying: " + toSend + " to: " + clientAddress.getHostAddress() + " Port: " + clientPort);
 
                 try
                 {
@@ -87,7 +87,7 @@ public class HELPER
         else
         {
             //TESTING
-            System.out.println("------------------->Send completed<---------------------------");
+            System.out.println("------------------->Send completed: " + toSend + "<---------------------------");
         }
     }
 
