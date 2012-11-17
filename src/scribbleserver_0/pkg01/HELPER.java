@@ -11,13 +11,14 @@ import java.net.ConnectException;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Vector;
 
 /**
  *
  * @author Grzegorz Gut <Gregg.Gut@gmail.com>
  */
-public class HELPER
+public class HELPER implements Runnable
 {
 
     /**
@@ -28,67 +29,80 @@ public class HELPER
      * Used to split the points received from the clients
      */
     public static String splitPoints = "#";
-
     /**
-     * Static function that allows the server to send messages to the clients
-     *
-     * @param toSend Message to be send to a user
-     * @param clientAddress User Address (IP)
-     * @param clientPort User listening port
+     * Used as a queue that stores everything that needs to be send
      */
-    synchronized static void send(String toSend, InetAddress clientAddress, int clientPort)
+    private static Vector<ToBeSend> toBeSend = new Vector<ToBeSend>();
+
+    @Override
+    public void run()
     {
-        int counter = 0;
-        /*
-         * Sending function, will get repeated up to 5 times in case of failures
-         */
-        boolean failedSending = true;
-        while (counter < 5)
+        while (true)
         {
-            try
+            for (int i = 0; i < toBeSend.size(); i++)
             {
-                Socket socket = new Socket(clientAddress, clientPort);
-
-                PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-                out.print(toSend);
-                out.close();
-                socket.close();  // Close the socket and its streams
-
-                failedSending = false;
-                break;
-            }
-            catch (ConnectException x)
-            {
-                counter++;
-
-                System.out.println("Cannot connect to server... retrying: " + toSend + " to: " + clientAddress.getHostAddress() + " Port: " + clientPort);
-
                 try
                 {
-                    Thread.currentThread().sleep(1000);
-                }
-                catch (Exception cannotSleep)
-                {
-                }
-            }
-            catch (IOException x)
-            {
-                counter++;
-                System.out.println("IOException");
-                x.printStackTrace();
-            }
-        }
+                    Socket socket = new Socket(toBeSend.elementAt(i).getClientAddress(), toBeSend.elementAt(i).getClientPort());
 
-        if (failedSending)
-        {
-            //TESTING
-            System.out.println("Failed sending... <---------------------------");
+                    PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+                    out.print(toBeSend.elementAt(i).getToSend());
+                    out.close();
+                    socket.close();  // Close the socket and its streams
+
+                    toBeSend.set(i, null);
+
+                    break;
+                }
+                catch (ConnectException x)
+                {
+                    if (toBeSend.elementAt(i).getCounter() > 100)
+                    {
+                        System.out.println("Cannot connect to client... Will not retry this: " + toBeSend.elementAt(i).getToSend() + " to: " + toBeSend.elementAt(i).getClientAddress().getHostAddress() + " Port: " + toBeSend.elementAt(i).getClientPort());
+                        toBeSend.set(i, null);
+                        break;
+                    }
+                }
+                catch (IOException x)
+                {
+                    if (toBeSend.elementAt(i).getCounter() > 100)
+                    {
+                        System.out.println("Cannot connect to client...  Will not retry this: " + toBeSend.elementAt(i).getToSend() + " to: " + toBeSend.elementAt(i).getClientAddress().getHostAddress() + " Port: " + toBeSend.elementAt(i).getClientPort());
+                        toBeSend.set(i, null);
+                        break;
+                    }
+                    System.out.println("IOException");
+                    x.printStackTrace();
+                }
+            }
+
+            /**
+             * Removing all the send requests that have been completed or that the client do not respond to
+             */
+            toBeSend.removeAll(Collections.singleton(null));
+
+
+            try
+            {
+                Thread.currentThread().sleep(40);
+            }
+            catch (Exception cannotSleep)
+            {
+            }
         }
-        else
-        {
-            //TESTING
-            System.out.println("------------------->Send completed: " + toSend + "<---------------------------");
-        }
+    }
+
+    /**
+     * This function adds to the send Vector, which is checked periodically by the sending thread
+     *
+     * @param toSend String that needs to be send
+     * @param clientAddress The client address
+     * @param clientPort The client listening port
+     */
+    static void AddToSend(String toSend, InetAddress clientAddress, int clientPort)
+    {
+        ToBeSend request = new ToBeSend(toSend, clientAddress, clientPort);
+        toBeSend.add(request);
     }
 
     /**

@@ -36,22 +36,24 @@ public class ScribbleServer_001
         /**
          * Creating the Receiver thread and giving it the highest possible priority
          */
-        Thread t = new Thread(new Receiver(mUsers, mFiles));
-        t.setPriority(Thread.MAX_PRIORITY);
+        Thread receiver = new Thread(new Receiver(mUsers, mFiles));
+        receiver.setPriority(Thread.MAX_PRIORITY);
+        receiver.start();
 
         /**
-         * Starting the thread
+         * This thread checks a queue periodically and if there is anything in it it sends it
          */
-        t.start();
+        Thread sender = new Thread(new HELPER());
+        sender.start();
 
         /**
          * Loop until the thread is stopped
          */
-        while (t.isAlive())
+        while (receiver.isAlive())
         {
             try
             {
-                Thread.currentThread().sleep(1000);
+                Thread.sleep(1000);
             }
             catch (Exception x)
             {

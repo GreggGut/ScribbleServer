@@ -272,7 +272,7 @@ public class RequestAnalyser implements Runnable
         //TOCONF This is most likely completely useless since user will be delete after this request
         //user.increaseClientExpectsRequestID();
 
-        HELPER.send(toSend, user.getAddress(), user.getPort());
+        HELPER.AddToSend(toSend, user.getAddress(), user.getPort());
 
         /**
          * Once we are done with this we set it as completed. This is done so that the user can be removed from the active users list
@@ -297,6 +297,12 @@ public class RequestAnalyser implements Runnable
             user.getActiveFile().setPresentOwner(user);
             user.setOwnership(true);
 
+            System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+            for(User u:user.getActiveFile().getmActiveUsers())
+            {
+                System.out.println("User: "+u.getName());
+            }
+            System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
             /**
              * Informing all users that the file ownership has been taken, including the requesting user
              */
@@ -309,6 +315,7 @@ public class RequestAnalyser implements Runnable
                 toSend += ServerToClient.ALLOW_OWNERSHIP;
                 toSend += HELPER.split;
 
+                //This is the name of the user who is becomeing the Owner
                 toSend += user.getName();
                 toSend += HELPER.split;
 
@@ -327,9 +334,9 @@ public class RequestAnalyser implements Runnable
                 toSend += request.getRequestID();
                 toSend += HELPER.split;
 
-                HELPER.send(toSend, allUsers.getAddress(), allUsers.getPort());
+                HELPER.AddToSend(toSend, allUsers.getAddress(), allUsers.getPort());
 
-                user.setClientExpectsRequestID(request.getRequestID() + 1);
+                allUsers/*user*/.setClientExpectsRequestID(request.getRequestID() + 1);
             }
         }
         //TOCONF This is removed for now
@@ -377,7 +384,7 @@ public class RequestAnalyser implements Runnable
          */
         for (User allUsers : user.getActiveFile().getmActiveUsers())
         {
-            HELPER.send(toSend, allUsers.getAddress(), allUsers.getPort());
+            HELPER.AddToSend(toSend, allUsers.getAddress(), allUsers.getPort());
             if(!user.equals(allUsers))
             {
                 allUsers.increaseClientExpectsRequestID();
@@ -417,7 +424,7 @@ public class RequestAnalyser implements Runnable
         /**
          * Send file list to client
          */
-        HELPER.send(toBeSend, user.getAddress(), user.getPort());
+        HELPER.AddToSend(toBeSend, user.getAddress(), user.getPort());
     }
 
     /**

@@ -93,13 +93,13 @@ public class User
             loggedIn = false;
             if (activeFile != null && activeFile.getPresentOwner() != null)
             {
-                getActiveFile().removeUser(this);
                 if (activeFile.getPresentOwner().equals(this))
                 {
                     activeFile.setPresentOwner(null);
                 }
-
+                
             }
+            getActiveFile().removeUser(this);
 
 
             /**

@@ -122,7 +122,7 @@ public class PacketAnalyzer implements Runnable
 
                                     //user.increaseClientExpectsRequestID();
 
-                                    HELPER.send(toSend, user.getAddress(), user.getPort());
+                                    HELPER.AddToSend(toSend, user.getAddress(), user.getPort());
                                 }
                                 else
                                 {
@@ -134,7 +134,7 @@ public class PacketAnalyzer implements Runnable
 
                                     //user.increaseClientExpectsRequestID();
 
-                                    HELPER.send(toSend, user.getAddress(), user.getPort());
+                                    HELPER.AddToSend(toSend, user.getAddress(), user.getPort());
                                 }
                             }
                             /**
@@ -152,7 +152,7 @@ public class PacketAnalyzer implements Runnable
 
                                 //user.increaseClientExpectsRequestID();
 
-                                HELPER.send(toSend, user.getAddress(), user.getPort());
+                                HELPER.AddToSend(toSend, user.getAddress(), user.getPort());
                             }
                         }
                         catch (NumberFormatException e)
@@ -716,16 +716,15 @@ public class PacketAnalyzer implements Runnable
         //exclude = null;
         for (User user : mUsers)
         {
+
             if (!user.equals(exclude))
             {
-                HELPER.send(message, user.getAddress(), user.getPort());
-                
+                HELPER.AddToSend(message, user.getAddress(), user.getPort());
+
                 //TOCONF Should this be here or before the if?
                 user.increaseClientExpectsRequestID();
             }
-
             //user.increaseClientExpectsRequestID();
         }
-
     }
 }
