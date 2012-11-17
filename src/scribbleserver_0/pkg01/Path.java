@@ -18,6 +18,7 @@ public class Path
     private boolean mode; //false for erase, true for write
     private int color;
     private boolean active;
+    private int width;
     private ArrayList<Point> mPoints = new ArrayList<Point>();
 
     /**
@@ -28,12 +29,13 @@ public class Path
      * @param color The color of the path
      * @param active Is the path active (should be show it or not.. is it the most up to date path)
      */
-    Path(int id, boolean mode, int color, boolean active)
+    Path(int id, boolean mode, int color, boolean active, int width)
     {
         this.id = id;
         this.mode = mode;
         this.color = color;
         this.active = active;
+        this.width = width;
     }
 
     /**

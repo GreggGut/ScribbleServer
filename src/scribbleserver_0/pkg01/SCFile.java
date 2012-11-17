@@ -107,7 +107,7 @@ public class SCFile
     {
         this.presentOwner = presentOwner;
     }
-    
+
     public void removeUser(User removeUser)
     {
         mActiveUsers.remove(removeUser);

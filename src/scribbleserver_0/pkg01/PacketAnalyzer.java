@@ -60,7 +60,6 @@ public class PacketAnalyzer implements Runnable
                 return;
             }
 
-
             switch (choice)
             {
                 /**
@@ -118,6 +117,10 @@ public class PacketAnalyzer implements Runnable
                                     String toSend = "";
                                     toSend += ServerToClient.LOG_IN_SUCCESSFUL;
                                     toSend += HELPER.split;
+                                    toSend += user.getClientExpectsRequestID();
+                                    toSend += HELPER.split;
+
+                                    //user.increaseClientExpectsRequestID();
 
                                     HELPER.send(toSend, user.getAddress(), user.getPort());
                                 }
@@ -126,6 +129,10 @@ public class PacketAnalyzer implements Runnable
                                     String toSend = "";
                                     toSend += ServerToClient.LOG_IN_FAILED_WRONG_PASSWORD;
                                     toSend += HELPER.split;
+                                    toSend += user.getClientExpectsRequestID();
+                                    toSend += HELPER.split;
+
+                                    //user.increaseClientExpectsRequestID();
 
                                     HELPER.send(toSend, user.getAddress(), user.getPort());
                                 }
@@ -140,6 +147,10 @@ public class PacketAnalyzer implements Runnable
                                 String toSend = "";
                                 toSend += ServerToClient.LOG_IN_FAIL_USER_ALREADY_LOGGED_IN;
                                 toSend += HELPER.split;
+                                toSend += user.getClientExpectsRequestID();
+                                toSend += HELPER.split;
+
+                                //user.increaseClientExpectsRequestID();
 
                                 HELPER.send(toSend, user.getAddress(), user.getPort());
                             }
@@ -195,12 +206,12 @@ public class PacketAnalyzer implements Runnable
                                      */
                                     mUsers.remove(i);
                                     System.out.println("User logout and removed\nUsers logged in:");
-                                    
-                                    for(User user:mUsers)
+
+                                    for (User user : mUsers)
                                     {
-                                        System.out.println("User: "+user.getName()+" "+user.getAddress());
+                                        System.out.println("User: " + user.getName() + " " + user.getAddress());
                                     }
-                                    
+
 
                                     break;
                                 }
@@ -368,7 +379,7 @@ public class PacketAnalyzer implements Runnable
                  * newPath - username - requestID - pathID - mode - color - active - page
                  */
                 case ClientToServer.NEW_PATH:
-                    if (info.length > 7)
+                    if (info.length > 8)
                     {
                         try
                         {
@@ -398,6 +409,7 @@ public class PacketAnalyzer implements Runnable
                                 active = false;
                             }
                             int page = Integer.parseInt(info[7]);
+                            int width = Integer.parseInt(info[8]);
 
                             /**
                              * Find the requesting user, starting the new path request, and broadcasting this request to all active users of
@@ -407,7 +419,7 @@ public class PacketAnalyzer implements Runnable
                             {
                                 if (user.getName().equals(username) && user.getAddress().equals(clientAddress))
                                 {
-                                    NewPathRequest request = new NewPathRequest(requestID, pathID, mode, color, active, page);
+                                    NewPathRequest request = new NewPathRequest(requestID, pathID, mode, color, active, page, width);
                                     user.addRequest(request);
 
                                     //TESTING
@@ -701,14 +713,18 @@ public class PacketAnalyzer implements Runnable
     private void broadcastRequest(User exclude, String message)
     {
         //TESTING exclude = null; shouldn't be.. it is only used for testing
-        exclude = null;
+        //exclude = null;
         for (User user : mUsers)
         {
-
             if (!user.equals(exclude))
             {
                 HELPER.send(message, user.getAddress(), user.getPort());
+                
+                //TOCONF Should this be here or before the if?
+                user.increaseClientExpectsRequestID();
             }
+
+            //user.increaseClientExpectsRequestID();
         }
 
     }

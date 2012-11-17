@@ -205,7 +205,7 @@ public class RequestAnalyser implements Runnable
     private void executeNewPathRequest(NewPathRequest request)
     {
         System.out.println("executeNewPathRequest");
-        Path path = new Path(request.getPathID(), request.isMode(), request.getColor(), request.isActive());
+        Path path = new Path(request.getPathID(), request.isMode(), request.getColor(), request.isActive(), request.getWidth());
 
         /**
          * Adding new path to the
@@ -264,7 +264,14 @@ public class RequestAnalyser implements Runnable
         user.logout();
         String toSend = "";
         toSend += ServerToClient.LOG_OUT_SUCCESSFUL;
+        toSend += HELPER.split;        
+        
+        toSend += user.getClientExpectsRequestID();
         toSend += HELPER.split;
+
+        //TOCONF This is most likely completely useless since user will be delete after this request
+        //user.increaseClientExpectsRequestID();
+
         HELPER.send(toSend, user.getAddress(), user.getPort());
 
         /**
@@ -291,43 +298,55 @@ public class RequestAnalyser implements Runnable
             user.setOwnership(true);
 
             /**
-             * Creating the message that will inform all concerned users of who has the file ownership
-             */
-            String toSend = "";
-            toSend += ServerToClient.ALLOW_OWNERSHIP;
-            toSend += HELPER.split;
-
-            toSend += user.getName();
-            toSend += HELPER.split;
-
-            toSend += request.getRequestID();
-            toSend += HELPER.split;
-
-            /**
-             * The request ID will be used by the receivers to know where to start their expected request ID
-             */
-            toSend += request.getRequestID();
-            toSend += HELPER.split;
-
-            /**
              * Informing all users that the file ownership has been taken, including the requesting user
              */
             for (User allUsers : user.getActiveFile().getmActiveUsers())
             {
+                /**
+                 * Creating the message that will inform all concerned users of who has the file ownership
+                 */
+                String toSend = "";
+                toSend += ServerToClient.ALLOW_OWNERSHIP;
+                toSend += HELPER.split;
+
+                toSend += user.getName();
+                toSend += HELPER.split;
+
+                /**
+                 * This is so that the respective clients acknowledge this request and change what they expect to the
+                 * request.getRequestID();
+                 */
+                toSend += allUsers.getClientExpectsRequestID(); //request.getRequestID();
+                toSend += HELPER.split;
+
+                //allUsers.increaseClientExpectsRequestID();
+
+                /**
+                 * The request ID will be used by the receivers to know where to start their expected request ID
+                 */
+                toSend += request.getRequestID();
+                toSend += HELPER.split;
+
                 HELPER.send(toSend, allUsers.getAddress(), allUsers.getPort());
+
+                user.setClientExpectsRequestID(request.getRequestID() + 1);
             }
         }
-        else
-        {
-            /**
-             * Ownership already taken, inform requesting user
-             */
-            String toSend = "";
-            toSend += ServerToClient.DISALLOW_OWNERSHIP;
-            toSend += HELPER.split;
-
-            HELPER.send(toSend, user.getAddress(), user.getPort());
-        }
+        //TOCONF This is removed for now
+//        else
+//        {
+//            /**
+//             * Ownership already taken, inform requesting user
+//             */
+//            String toSend = "";
+//            toSend += ServerToClient.DISALLOW_OWNERSHIP;
+//            toSend += HELPER.split;
+//
+//            toSend += user.getClientExpectsRequestID();
+//            toSend += HELPER.split;
+//
+//            HELPER.send(toSend, user.getAddress(), user.getPort());
+//        }
     }
 
     /**
@@ -349,12 +368,22 @@ public class RequestAnalyser implements Runnable
         toSend += ServerToClient.OWNERSHIP_IS_AVAILABLE;
         toSend += HELPER.split;
 
+        //All users should expect the same request ID
+        toSend += user.getClientExpectsRequestID();
+        toSend += HELPER.split;
+
         /**
          * Broadcasting to all active users that the write access is for grabs
          */
         for (User allUsers : user.getActiveFile().getmActiveUsers())
         {
             HELPER.send(toSend, allUsers.getAddress(), allUsers.getPort());
+            if(!user.equals(allUsers))
+            {
+                allUsers.increaseClientExpectsRequestID();
+            }
+            
+            //user.increaseClientExpectsRequestID();
         }
     }
 
@@ -365,10 +394,16 @@ public class RequestAnalyser implements Runnable
      */
     private void executeGetFileListRequest(GetFileListRequest request)
     {
+        //TOCONF We might need to have a request ID with this
         System.out.println("executeGetFileListRequest");
         String toBeSend = "";
         toBeSend += ServerToClient.FILE_LIST_AVAILABLE;
         toBeSend += HELPER.split;
+
+        toBeSend += user.getClientExpectsRequestID();
+        toBeSend += HELPER.split;
+        
+        //user.increaseClientExpectsRequestID();
 
         /**
          * Creating a text file will all the files available to the user
@@ -376,7 +411,7 @@ public class RequestAnalyser implements Runnable
         for (SCFile file : request.getmFiles())
         {
             toBeSend += file.getName();
-            toBeSend += HELPER.split;
+            toBeSend += HELPER.splitPoints;
         }
 
         /**
@@ -418,7 +453,6 @@ public class RequestAnalyser implements Runnable
                 user.getWorkingPath().AddPoint(mPoint);
             }
         }
-
     }
 
     /**

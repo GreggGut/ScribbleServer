@@ -17,6 +17,7 @@ public class NewPathRequest implements Request
     private int color;
     private boolean active;
     private int page;
+    private int width;
 
     /**
      * Get the request ID - Request are executed in order starting from the smallest (earlier request) to a larger (newer request) request
@@ -41,7 +42,7 @@ public class NewPathRequest implements Request
      * @param page The page to which this request corresponds
      * //TOCONF Do we need a page number here???
      */
-    NewPathRequest(int requestID, int pathID, boolean mode, int color, boolean active, int page)
+    NewPathRequest(int requestID, int pathID, boolean mode, int color, boolean active, int page, int width)
     {
         this.requestID = requestID;
         this.pathID = pathID;
@@ -49,6 +50,7 @@ public class NewPathRequest implements Request
         this.color = color;
         this.active = active;
         this.page = page;
+        this.width = width;
     }
 
     /**
@@ -101,4 +103,14 @@ public class NewPathRequest implements Request
     {
         return page;
     }
+
+    /**
+     * Get the width on the path
+     * @return 
+     */
+    public int getWidth()
+    {
+        return width;
+    }
+    
 }

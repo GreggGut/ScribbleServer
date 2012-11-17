@@ -26,7 +26,8 @@ public class User
     private Path workingPath;
     private Vector<Request> mRequests = new Vector<Request>();
     private RequestAnalyser analyser;
-    private int requestID;
+    private int requestIDFromClient;
+    private int clientExpectsRequestID = 0;
     private Thread mAnalyser;
 
     /**
@@ -44,7 +45,7 @@ public class User
         this.address = address;
         this.password = password;
         this.port = port;
-        this.requestID = requestID;
+        this.requestIDFromClient = requestID;
         this.activeFile = file;
     }
 
@@ -67,7 +68,7 @@ public class User
         activeFile.addActiveUsers(this);
 
         //Starting the Request analyzer for this user
-        analyser = new RequestAnalyser(mRequests, this, requestID);
+        analyser = new RequestAnalyser(mRequests, this, requestIDFromClient);
         mAnalyser = new Thread(analyser);
         mAnalyser.start();
 
@@ -90,16 +91,16 @@ public class User
              * Setting loggedIn to false and
              */
             loggedIn = false;
-            if (activeFile != null && activeFile.getPresentOwner() != null )
+            if (activeFile != null && activeFile.getPresentOwner() != null)
             {
                 getActiveFile().removeUser(this);
-                if(activeFile.getPresentOwner().equals(this))
+                if (activeFile.getPresentOwner().equals(this))
                 {
                     activeFile.setPresentOwner(null);
                 }
-                
+
             }
-            
+
 
             /**
              * This interrupts the Request analyzer thread since it is no longer needed
@@ -222,5 +223,20 @@ public class User
     public void setWorkingPath(Path workingPath)
     {
         this.workingPath = workingPath;
+    }
+
+    public int getClientExpectsRequestID()
+    {
+        return clientExpectsRequestID++;
+    }
+
+    public void increaseClientExpectsRequestID()
+    {
+        clientExpectsRequestID++;
+    }
+
+    public void setClientExpectsRequestID(int clientExpectsRequestID)
+    {
+        this.clientExpectsRequestID = clientExpectsRequestID;
     }
 }
