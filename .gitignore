@@ -5,3 +5,4 @@
 *.war
 *.ear
 /dist/
+/nbproject/private/
