@@ -113,8 +113,8 @@ public class ScribbleClients
 
     synchronized public String getListOfFiles()
     {
-        String toBeSend = "";
-        toBeSend += NetworkProtocol.FILE_LIST_AVAILABLE;
+        String toBeSend = NetworkProtocol.split;
+        toBeSend += NetworkProtocol.GET_FILE_LIST;
         toBeSend += NetworkProtocol.split;
 
         //user.increaseClientExpectsRequestID();

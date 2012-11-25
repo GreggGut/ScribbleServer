@@ -43,7 +43,7 @@ public class NetworkProtocol
     /**
      * Network protocol from Server to Client
      */
-    public static final int FILE_LIST_AVAILABLE = 101;
+//    public static final int FILE_LIST_AVAILABLE = 101;  We are using GET_FILE_LIST = 4; instead
 //    public static final int LOG_IN_SUCCESSFUL = 0;
 //    public static final int LOG_IN_FAILED_WRONG_PASSWORD = 1;
 //    public static final int LOG_OUT_SUCCESSFUL = 2;

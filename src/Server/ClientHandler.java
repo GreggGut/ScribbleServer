@@ -65,7 +65,7 @@ public class ClientHandler extends Thread
             while ((line = in.readLine()) != null)//!done)
             {
                 //line = in.readLine();
-                doRequest(line);
+                decodeRequest(line);
             }
         }
         catch (IOException e)
@@ -79,7 +79,7 @@ public class ClientHandler extends Thread
      *
      * @param line
      */
-    private void doRequest(String line)//, PrintWriter out)
+    private void decodeRequest(String line)//, PrintWriter out)
     /*
      * The input line (client message) can be :
      * who	-- a list of users is returned
