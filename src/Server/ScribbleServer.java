@@ -6,13 +6,13 @@ import java.net.*;
  *
  * @author Grzegorz Gut <Gregg.Gut@gmail.com>
  */
-public class ServerTest
+public class ScribbleServer
 {
 
-    static final int PORT = 1234;  // port for this server
+    static final int PORT = 21223;  // port for this server
     private ScribbleClients mClients;
 
-    public ServerTest()
+    public ScribbleServer()
     // wait for a client connection, spawn a thread, repeat
     {
         mClients = new ScribbleClients();
@@ -39,6 +39,6 @@ public class ServerTest
      */
     public static void main(String[] args)
     {
-        new ServerTest();
+        new ScribbleServer();
     }
 }
