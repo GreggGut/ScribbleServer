@@ -43,7 +43,7 @@ public class Page
 
     public void removeLastPath()
     {
-        mPaths.remove(mPaths.size() - 1);
+        //mPaths.remove(mPaths.size() - 1);
     }
 
     public void deletePath(int pathID)
