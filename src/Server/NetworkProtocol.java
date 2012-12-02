@@ -30,6 +30,7 @@ public class NetworkProtocol
     public static final int UNDO = 9;
     public static final int REDO = 10;
     public static final int DELETE_PATH = 11;
+    public static final int CLEAR_ALL = 12;
     /**
      * User to split the info received from the clients
      */
@@ -38,8 +39,6 @@ public class NetworkProtocol
      * Used to split the points received from the clients
      */
     public static String splitPoints = "#";
-
-
     /**
      * Network protocol from Server to Client
      */
@@ -60,5 +59,4 @@ public class NetworkProtocol
 //    public static final int PERIODIC_ALIVE_CHECK = 13;
 //    public static final int OWNERSHIP_IS_AVAILABLE = 14;
 //    public static final int LOG_IN_FAIL_USER_ALREADY_LOGGED_IN = 15;
-
 }

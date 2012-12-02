@@ -57,4 +57,9 @@ public class Page
             }
         }
     }
+
+    public void clearPage()
+    {
+        mPaths.clear();
+    }
 }

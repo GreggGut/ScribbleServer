@@ -222,6 +222,11 @@ public class ClientHandler extends Thread
                     deletePath(info, line);
 
                     break;
+
+                case NetworkProtocol.CLEAR_ALL:
+                    clearAll(info, line);
+
+                    break;
                 default:
                     System.out.println("Should NOT be here....");
                     break;
@@ -465,6 +470,29 @@ public class ClientHandler extends Thread
             int pathID = Integer.parseInt(info[3]);
 
             me.getmFile().getmPages().get(page).deletePath(pathID);
+
+            mClients.broadcast(line, me, false);
+        }
+        catch (NumberFormatException x)
+        {
+            /**
+             * Failed parsing, this request will be ignored
+             */
+        }
+    }
+
+    private void clearAll(String[] info, String line)
+    {
+        System.out.println("Clean all");
+
+        try
+        {
+            /**
+             * Parsing all the received info
+             */
+            int page = Integer.parseInt(info[2]);
+
+            me.getmFile().getmPages().get(page).clearPage();
 
             mClients.broadcast(line, me, false);
         }
