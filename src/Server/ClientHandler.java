@@ -90,7 +90,7 @@ public class ClientHandler extends Thread
         //Remove all spaces
         String decodeLine = line.trim();
 
-        System.out.println("Received in Packet Analyzer: " + line);
+        //System.out.println("Received in Packet Analyzer: " + line);
         /**
          * separating received data into readable information
          */
@@ -111,7 +111,7 @@ public class ClientHandler extends Thread
                 /**
                  * Cannot identify what was send - technically we should never get here
                  */
-                System.out.append("Failed to identify the received message");
+                System.out.println("Failed to identify the received message");
                 return;
             }
 
@@ -242,7 +242,6 @@ public class ClientHandler extends Thread
     {
         System.out.println("Login, Not implemented");
         //TODO implement the login function
-
     }
 
     /**
@@ -268,7 +267,7 @@ public class ClientHandler extends Thread
             me.getmFile().setPresentOwner(me);
             mClients.broadcast(line, me, true);
         }
-        //TOCONF This might be needed for for now it is removed
+        //TOCONF This might be needed but for now it is removed
 //                else
 //                {
 //                    String toSend = ClientToServer.split;
@@ -320,7 +319,7 @@ public class ClientHandler extends Thread
      */
     private void newPath(String[] info, String line)
     {
-        System.out.println("New path");
+        //System.out.println("New path");
 
         try
         {
@@ -373,7 +372,7 @@ public class ClientHandler extends Thread
      */
     private void addPoint(String[] info, String line)
     {
-        System.out.println("add points");
+        //System.out.println("add points");
 
         /**
          * Parsing all the info received
