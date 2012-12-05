@@ -19,6 +19,7 @@ public class Path
     private int color;
     private boolean active;
     private int width;
+    private int page;
     private ArrayList<Point> mPoints = new ArrayList<Point>();
 
     /**
@@ -29,13 +30,14 @@ public class Path
      * @param color The color of the path
      * @param active Is the path active (should be show it or not.. is it the most up to date path)
      */
-    Path(int id, boolean mode, int color, boolean active, int width)
+    Path(int id, boolean mode, int color, boolean active, int width, int page)
     {
         this.id = id;
         this.mode = mode;
         this.color = color;
         this.active = active;
         this.width = width;
+        this.page = page;
     }
 
     /**
@@ -96,5 +98,15 @@ public class Path
     public ArrayList<Point> getmPoints()
     {
         return mPoints;
+    }
+
+    public int getPage()
+    {
+        return page;
+    }
+
+    public int getWidth()
+    {
+        return width;
     }
 }

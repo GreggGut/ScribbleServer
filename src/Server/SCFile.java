@@ -63,7 +63,7 @@ public class SCFile
      *
      * @return An ArrayList of all the pages of this document
      */
-    public ArrayList<Page> getmPages()
+    public ArrayList<Page> getPages()
     {
         return mPages;
     }

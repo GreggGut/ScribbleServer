@@ -2,6 +2,7 @@ package Server;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.ArrayList;
 
 /**
  *
@@ -60,6 +61,7 @@ public class ClientHandler extends Thread
     {
         String line;
         boolean done = false;
+        //transformPath();
         try
         {
             while ((line = in.readLine()) != null)//!done)
@@ -311,6 +313,9 @@ public class ClientHandler extends Thread
     private void downloadFile(String[] info)
     {
         System.out.println("download files");
+        sendWholeFile();
+
+
     }
 
     /**
@@ -349,9 +354,9 @@ public class ClientHandler extends Thread
             int page = Integer.parseInt(info[6]);
             int width = Integer.parseInt(info[7]);
 
-            Path path = new Path(width, mode, color, active, width);
+            Path path = new Path(width, mode, color, active, width, page);
 
-            me.getmFile().getmPages().get(page).addPath(path);
+            me.getmFile().getPages().get(page).addPath(path);
             me.setWorkingPath(path);
 
             //If everything got parsed then we can forward it to all clients
@@ -388,6 +393,7 @@ public class ClientHandler extends Thread
 
             Point point = new Point(x, y);
             me.getWorkingPath().AddPoint(point);
+            //System.out.println("Added point in addPOint");
         }
 
         mClients.broadcast(line, me, false);
@@ -419,7 +425,7 @@ public class ClientHandler extends Thread
          */
         int page = Integer.parseInt(info[2]);
 
-        me.getmFile().getmPages().get(page).removeLastPath();
+        me.getmFile().getPages().get(page).removeLastPath();
 
         mClients.broadcast(line, me, false);
 
@@ -468,7 +474,7 @@ public class ClientHandler extends Thread
             int page = Integer.parseInt(info[2]);
             int pathID = Integer.parseInt(info[3]);
 
-            me.getmFile().getmPages().get(page).deletePath(pathID);
+            me.getmFile().getPages().get(page).deletePath(pathID);
 
             mClients.broadcast(line, me, false);
         }
@@ -491,7 +497,7 @@ public class ClientHandler extends Thread
              */
             int page = Integer.parseInt(info[2]);
 
-            me.getmFile().getmPages().get(page).clearPage();
+            me.getmFile().getPages().get(page).clearPage();
 
             mClients.broadcast(line, me, false);
         }
@@ -508,5 +514,95 @@ public class ClientHandler extends Thread
         String header = String.format("%4d", toSend.length() + 1);
         toSend = header + toSend;
         return toSend;
+    }
+
+    private void sendWholeFile()
+    {
+        SCFile file = me.getmFile();
+        for (Page page : file.getPages())
+        {
+            for (Path path : page.getPaths())
+            {
+                transformPath(path);
+            }
+        }
+    }
+
+    private void transformPath(Path path)
+    {
+        //Path path = new Path(10, true, 32145, false, 3, 0);
+        String mPath = NetworkProtocol.split;
+        mPath += String.valueOf(NetworkProtocol.NEW_PATH);
+        mPath += NetworkProtocol.split;
+
+        mPath += path.getId();
+        mPath += NetworkProtocol.split;
+
+        int mode = 1;
+        if (!path.getMode())
+        {
+            mode = 0;
+        }
+        mPath += mode;
+        mPath += NetworkProtocol.split;
+
+        mPath += path.getColor();
+        mPath += NetworkProtocol.split;
+
+        int active = 1;
+        if (!path.isActive())
+        {
+            active = 0;
+        }
+        mPath += active;
+        mPath += NetworkProtocol.split;
+
+        mPath += path.getPage();
+        mPath += NetworkProtocol.split;
+
+        mPath += path.getWidth();
+        mPath += NetworkProtocol.split;
+
+        System.out.println(mPath);
+
+        mPath = encriptMessage(mPath);
+        me.sendMessage(mPath);
+
+        ArrayList<Point> points = path.getmPoints();
+        String start = NetworkProtocol.split;
+        start += String.valueOf(NetworkProtocol.ADD_POINTS);
+        start += NetworkProtocol.split;
+        String mPoints = start;
+        for (Point point : points)
+        {
+            if (mPoints.length() < 220)
+            {
+                mPoints += point.x();
+                mPoints += NetworkProtocol.splitPoints;
+                mPoints += point.y();
+                mPoints += NetworkProtocol.splitPoints;
+            }
+            else
+            {
+                mPoints = mPoints.substring(0, mPoints.length() - 1);
+                mPoints = encriptMessage(mPoints);
+                me.sendMessage(mPoints);
+
+                mPoints = start;
+            }
+        }
+        if (!mPoints.equals(start))
+        {
+            mPoints = mPoints.substring(0, mPoints.length() - 1);
+            mPoints = encriptMessage(mPoints);
+            me.sendMessage(mPoints);
+        }
+
+        String endpath = NetworkProtocol.split;
+        endpath += NetworkProtocol.END_PATH;
+        endpath = encriptMessage(endpath);
+        me.sendMessage(endpath);
+
+        //return mPath;
     }
 }
