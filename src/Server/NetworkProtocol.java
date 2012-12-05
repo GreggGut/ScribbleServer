@@ -31,6 +31,7 @@ public class NetworkProtocol
     public static final int REDO = 10;
     public static final int DELETE_PATH = 11;
     public static final int CLEAR_ALL = 12;
+    public static final int UPDATE_FILE=13;
     /**
      * User to split the info received from the clients
      */

@@ -229,6 +229,10 @@ public class ClientHandler extends Thread
                     clearAll(info, line);
 
                     break;
+
+                case NetworkProtocol.UPDATE_FILE:
+                    updateUserwithFileContent();
+                    break;
                 default:
                     System.out.println("Should NOT be here....");
                     break;
@@ -313,9 +317,6 @@ public class ClientHandler extends Thread
     private void downloadFile(String[] info)
     {
         System.out.println("download files");
-        sendWholeFile();
-
-
     }
 
     /**
@@ -516,7 +517,7 @@ public class ClientHandler extends Thread
         return toSend;
     }
 
-    private void sendWholeFile()
+    private void updateUserwithFileContent()
     {
         SCFile file = me.getmFile();
         for (Page page : file.getPages())
