@@ -355,7 +355,7 @@ public class ClientHandler extends Thread
             int page = Integer.parseInt(info[6]);
             int width = Integer.parseInt(info[7]);
 
-            Path path = new Path(width, mode, color, active, width, page);
+            Path path = new Path(pathID, mode, color, active, width, page);
 
             me.getmFile().getPages().get(page).addPath(path);
             me.setWorkingPath(path);
@@ -520,6 +520,7 @@ public class ClientHandler extends Thread
     private void updateUserwithFileContent()
     {
         SCFile file = me.getmFile();
+        System.out.println("Updating file");
         for (Page page : file.getPages())
         {
             for (Path path : page.getPaths())
@@ -527,6 +528,7 @@ public class ClientHandler extends Thread
                 transformPath(path);
             }
         }
+        System.out.println("Updating file ended");
     }
 
     private void transformPath(Path path)
