@@ -3,6 +3,8 @@ package Server;
 import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -111,7 +113,8 @@ public class ClientHandler extends Thread
             catch (NumberFormatException e)
             {
                 /**
-                 * Cannot identify what was send - technically we should never get here
+                 * Cannot identify what was send - technically we should never
+                 * get here
                  */
                 System.out.println("Failed to identify the received message");
                 return;
@@ -120,25 +123,21 @@ public class ClientHandler extends Thread
             switch (choice)
             {
                 /**
-                 * Login
-                 * Info will contain the following
-                 * login - password - port
+                 * Login Info will contain the following login - password - port
                  */
                 case NetworkProtocol.LOGIN:
                     login(info);
                     break;
 
                 /**
-                 * Logout
-                 * logout
+                 * Logout logout
                  */
                 case NetworkProtocol.LOGOUT:
                     logout(info);
                     break;
 
                 /**
-                 * Request Ownership
-                 * requestOwnership - ID
+                 * Request Ownership requestOwnership - ID
                  */
                 case NetworkProtocol.REQUEST_OWNERSHIP:
                     requestOwnership(line);
@@ -146,8 +145,7 @@ public class ClientHandler extends Thread
                     break;
 
                 /**
-                 * Release Ownership
-                 * releaseOwnership
+                 * Release Ownership releaseOwnership
                  */
                 case NetworkProtocol.RELEASE_OWNERSHIP:
                     releaseOwnership(line);
@@ -155,8 +153,7 @@ public class ClientHandler extends Thread
                     break;
 
                 /**
-                 * Get file list
-                 * getFileList
+                 * Get file list getFileList
                  */
                 case NetworkProtocol.GET_FILE_LIST:
                     getFileList();
@@ -164,16 +161,14 @@ public class ClientHandler extends Thread
                     break;
 
                 /**
-                 * Download file
-                 * TOCONF what will we do about this?
+                 * Download file TOCONF what will we do about this?
                  */
                 case NetworkProtocol.DOWNLOAD_FILE:
                     downloadFile(info);
                     break;
 
                 /**
-                 * New Path
-                 * newPath - pathID - mode - color - active - page
+                 * New Path newPath - pathID - mode - color - active - page
                  */
                 case NetworkProtocol.NEW_PATH:
                     newPath(info, line);
@@ -181,8 +176,7 @@ public class ClientHandler extends Thread
                     break;
 
                 /**
-                 * Add point to path
-                 * AddPoints - numberOfPoints - Points
+                 * Add point to path AddPoints - numberOfPoints - Points
                  */
                 case NetworkProtocol.ADD_POINTS:
                     addPoint(info, line);
@@ -190,33 +184,29 @@ public class ClientHandler extends Thread
                     break;
 
                 /**
-                 * End current path
-                 * EndPath - pathID
+                 * End current path EndPath - pathID
                  */
                 case NetworkProtocol.END_PATH:
                     endPath(line);
                     break;
 
                 /**
-                 * undo last action
-                 * Undo - page - pathID
+                 * undo last action Undo - page - pathID
                  */
                 case NetworkProtocol.UNDO:
                     undo(info, line);
                     break;
 
                 /**
-                 * redo last action
-                 * Redo - page - pathID
+                 * redo last action Redo - page - pathID
                  */
                 case NetworkProtocol.REDO:
-                    System.out.println("Redo, should not be here since redo will simply resend the whole path");
-                    //redo(info, line);
+                    //System.out.println("Redo, should not be here since redo will simply resend the whole path");
+                    redo(info, line);
                     break;
 
                 /**
-                 * delete path
-                 * Delete - page - pathID
+                 * delete path Delete - page - pathID
                  *
                  * TOCONFIRM How will we implement the delete function?
                  */
@@ -316,7 +306,41 @@ public class ClientHandler extends Thread
 
     private void downloadFile(String[] info)
     {
-        System.out.println("download files");
+//        FileInputStream fis = null;
+//        try
+//        {
+//            System.out.println("download files");
+//            //        import java.net.*;
+//            //import java.io.*;
+//            // sendfile
+//            File myFile = new File("source.pdf");
+//            byte[] mybytearray = new byte[(int) myFile.length()];
+//            fis = new FileInputStream(myFile);
+//            BufferedInputStream bis = new BufferedInputStream(fis);
+//            bis.read(mybytearray, 0, mybytearray.length);
+//            OutputStream os = clientSock.getOutputStream();
+//            System.out.println("Sending...");
+//            os.write(mybytearray, 0, mybytearray.length);
+//            os.flush();
+//        }
+//        catch (FileNotFoundException ex)
+//        {
+//            Logger.getLogger(ClientHandler.class.getName()).log(Level.SEVERE, null, ex);
+//        }
+//        catch (IOException ex)
+//        {
+//        }
+//        finally
+//        {
+//            try
+//            {
+//                fis.close();
+//            }
+//            catch (IOException ex)
+//            {
+//                Logger.getLogger(ClientHandler.class.getName()).log(Level.SEVERE, null, ex);
+//            }
+//        }
     }
 
     /**
@@ -420,9 +444,9 @@ public class ClientHandler extends Thread
         System.out.println("undo");
 
         /**
-         * TOCONF how will me implement this???
-         * For now I will completely delete this from the paths and on redo we will resend the whole path, all of it points, and end of
-         * path
+         * TOCONF how will me implement this??? For now I will completely delete
+         * this from the paths and on redo we will resend the whole path, all of
+         * it points, and end of path
          */
         int page = Integer.parseInt(info[2]);
 
@@ -432,33 +456,39 @@ public class ClientHandler extends Thread
 
     }
 
-//    /**
-//     *
-//     * @param info Redo - page - pathID
-//     */
-//    private void redo(String[] info, String line)
-//    {
-//        System.out.println("redo");
-//        if (info.length > 4)
-//        {
-//            try
-//            {
-//                /**
-//                 * Parsing all the received info
-//                 */
-//                int requestID = Integer.parseInt(info[2]);
-//                int page = Integer.parseInt(info[3]);
-//                int pathID = Integer.parseInt(info[4]);
-//
-//            }
-//            catch (NumberFormatException x)
-//            {
-//                /**
-//                 * Failed parsing, this request will be ignored
-//                 */
-//            }
-//        }
-//    }
+    /**
+     *
+     * @param info Redo - page - pathID
+     */
+    private void redo(String[] info, String line)
+    {
+        System.out.println("redo");
+        if (info.length > 4)
+        {
+            try
+            {
+                /**
+                 * Parsing all the received info
+                 */
+                int requestID = Integer.parseInt(info[2]);
+                int page = Integer.parseInt(info[3]);
+                int pathID = Integer.parseInt(info[4]);
+
+            }
+            catch (NumberFormatException x)
+            {
+                /**
+                 * Failed parsing, this request will be ignored
+                 */
+            }
+        }
+        
+        //Creating a new REDO message and broadcasting it
+        String message = NetworkProtocol.split;
+        message+=NetworkProtocol.REDO;
+        message += encriptMessage(message);
+        mClients.broadcast(message, me, false);
+    }
     /**
      *
      * @param info Delete - page - pathID
