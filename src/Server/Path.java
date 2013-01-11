@@ -17,10 +17,14 @@ public class Path
     private int id;
     private boolean mode; //false for erase, true for write
     private int color;
-    private boolean active;
+    //private boolean active;
     private int width;
     private int page;
     private ArrayList<Point> mPoints = new ArrayList<Point>();
+    private short type;
+    public static short PATH = 0;
+    public static short UNDO = 1;
+    public static short REDO = 2;
 
     /**
      * Default constructor
@@ -30,13 +34,27 @@ public class Path
      * @param color The color of the path
      * @param active Is the path active (should be show it or not.. is it the most up to date path)
      */
-    Path(int id, boolean mode, int color, boolean active, int width, int page)
+    Path(int id, boolean mode, int color, /*
+             * boolean active,
+             */ int width, int page)
     {
         this.id = id;
         this.mode = mode;
         this.color = color;
-        this.active = active;
+        //this.active = active;
         this.width = width;
+        this.page = page;
+        this.type = PATH;
+    }
+
+    /**
+     * Constructor used for undo/redo actions
+     *
+     * @param type 1 for undo, 2 for redo
+     */
+    Path(short type, int page)
+    {
+        this.type = type;
         this.page = page;
     }
 
@@ -80,16 +98,16 @@ public class Path
         return color;
     }
 
-    /**
-     * Is the path active (should it be rendered)
-     *
-     * @return True if the path should be rendered, false otherwise
-     */
-    public boolean isActive()
-    {
-        return active;
-    }
-
+//    /**
+//     * Is the path active (should it be rendered)
+//     *
+//     * @return True if the path should be rendered, false otherwise
+//     */
+//    public boolean isActive()
+//    {
+//        //TODO this might be useless, will try to redo this without this flag
+//        return active;
+//    }
     /**
      * Get all the points of this Path
      *
@@ -108,5 +126,10 @@ public class Path
     public int getWidth()
     {
         return width;
+    }
+
+    public short getType()
+    {
+        return type;
     }
 }

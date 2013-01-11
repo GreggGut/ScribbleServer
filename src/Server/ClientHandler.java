@@ -367,19 +367,21 @@ public class ClientHandler extends Thread
                 mode = false;
             }
             int color = Integer.parseInt(info[4]);
-            boolean active;
-            if (info[5].equals("1"))
-            {
-                active = true;
-            }
-            else
-            {
-                active = false;
-            }
-            int page = Integer.parseInt(info[6]);
-            int width = Integer.parseInt(info[7]);
+//            boolean active;
+//            if (info[5].equals("1"))
+//            {
+//                active = true;
+//            }
+//            else
+//            {
+//                active = false;
+//            }
+            int page = Integer.parseInt(info[5]);
+            int width = Integer.parseInt(info[6]);
 
-            Path path = new Path(pathID, mode, color, active, width, page);
+            Path path = new Path(pathID, mode, color/*
+                     * , active
+                     */, width, page);
 
             me.getmFile().getPages().get(page).addPath(path);
             me.setWorkingPath(path);
@@ -448,17 +450,28 @@ public class ClientHandler extends Thread
          * this from the paths and on redo we will resend the whole path, all of
          * it points, and end of path
          */
-        int page = Integer.parseInt(info[2]);
+        try
+        {
+            int page = Integer.parseInt(info[2]);
 
-        me.getmFile().getPages().get(page).removeLastPath();
+            //me.getmFile().getPages().get(page).removeLastPath();
+            Path newPath = new Path(Path.UNDO, page);
+            me.getmFile().getPages().get(page).addPath(newPath);
 
-        mClients.broadcast(line, me, false);
+            mClients.broadcast(line, me, false);
 
+        }
+        catch (NumberFormatException x)
+        {
+            /**
+             * Failed parsing, this request will be ignored
+             */
+        }
     }
 
     /**
      *
-     * @param info Redo - page - pathID
+     * @param info Redo - page
      */
     private void redo(String[] info, String line)
     {
@@ -470,10 +483,12 @@ public class ClientHandler extends Thread
                 /**
                  * Parsing all the received info
                  */
-                int requestID = Integer.parseInt(info[2]);
-                int page = Integer.parseInt(info[3]);
-                int pathID = Integer.parseInt(info[4]);
+                int page = Integer.parseInt(info[2]);
 
+                //Remove the last item, the undo action from the list
+                me.getmFile().getPages().get(page).getPaths().remove(me.getmFile().getPages().get(page).getPaths().size() - 1);
+
+                mClients.broadcast(line, me, false);
             }
             catch (NumberFormatException x)
             {
@@ -482,13 +497,8 @@ public class ClientHandler extends Thread
                  */
             }
         }
-        
-        //Creating a new REDO message and broadcasting it
-        String message = NetworkProtocol.split;
-        message+=NetworkProtocol.REDO;
-        message += encriptMessage(message);
-        mClients.broadcast(message, me, false);
     }
+
     /**
      *
      * @param info Delete - page - pathID
@@ -555,7 +565,24 @@ public class ClientHandler extends Thread
         {
             for (Path path : page.getPaths())
             {
-                transformPath(path);
+                if (path.getType() == Path.PATH)
+                {
+                    transformPath(path);
+                }
+                else if (path.getType() == Path.UNDO)
+                {
+                    String toSend = NetworkProtocol.split;
+                    toSend += NetworkProtocol.UNDO;
+                    toSend = encriptMessage(toSend);
+                    me.sendMessage(toSend);
+                }
+                else if (path.getType() == Path.REDO)
+                {
+                    String toSend = NetworkProtocol.split;
+                    toSend += NetworkProtocol.REDO;
+                    toSend = encriptMessage(toSend);
+                    me.sendMessage(toSend);
+                }
             }
         }
         System.out.println("Updating file ended");
@@ -582,13 +609,13 @@ public class ClientHandler extends Thread
         mPath += path.getColor();
         mPath += NetworkProtocol.split;
 
-        int active = 1;
-        if (!path.isActive())
-        {
-            active = 0;
-        }
-        mPath += active;
-        mPath += NetworkProtocol.split;
+//        int active = 1;
+//        if (!path.isActive())
+//        {
+//            active = 0;
+//        }
+//        mPath += active;
+//        mPath += NetworkProtocol.split;
 
         mPath += path.getPage();
         mPath += NetworkProtocol.split;
