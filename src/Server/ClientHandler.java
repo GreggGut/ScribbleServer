@@ -3,8 +3,6 @@ package Server;
 import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -306,6 +304,8 @@ public class ClientHandler extends Thread
 
     private void downloadFile(String[] info)
     {
+        System.out.println("Download file");
+        //me.sendFile();
 //        FileInputStream fis = null;
 //        try
 //        {
