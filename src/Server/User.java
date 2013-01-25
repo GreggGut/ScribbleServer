@@ -4,15 +4,21 @@
  */
 package Server;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
+import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -54,60 +60,66 @@ public class User
 
     synchronized public void sendFile()
     {
-        Socket clientSock = null;
-        OutputStream out2 = null;
-        DataOutputStream dos = null;
+        Socket socket = null;
+        DataInputStream in = null;
+        DataOutputStream out = null;
+        FileInputStream fis = null;
+
         try
         {
-            ServerSocket serverSock = new ServerSocket(34567);
-
-            clientSock = serverSock.accept();
-
-            System.out.println("Connected");
-            //create file object
-            File file = new File("documents/0.pdf");
-
-            FileInputStream fileInputStream = null;
-
-            /*
-             * Create new FileInputStream object. Constructor of FileInputStream throws
-             * FileNotFoundException if the agrument File does not exist.
-             */
-
-            out2 = clientSock.getOutputStream();
-            dos = new DataOutputStream(out2);
-            fileInputStream = new FileInputStream(file);
-            byte[] buffer = new byte[1024];
-            int number;
-
-            while ((number = fileInputStream.read(buffer)) != -1)
-            {
-                dos.write(buffer, 0, number);
-            }
+            socket = new Socket("127.0.0.1", 34567);
+            in = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
+            out = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
         }
-        catch (FileNotFoundException ex)
+        catch (UnknownHostException e)
         {
-            Logger.getLogger(User.class.getName()).log(Level.SEVERE, null, ex);
+            System.out.println("Unknown host: 127.0.0.1");
+            e.printStackTrace();
         }
-        catch (IOException ex)
+        catch (IOException e)
         {
-            Logger.getLogger(User.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        finally
-        {
-            try
-            {
-                clientSock.close();
-                dos.close();
-                out2.close();
-
-            }
-            catch (IOException ex)
-            {
-                Logger.getLogger(User.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            System.out.println("No I/O");
+            e.printStackTrace();
         }
 
+        try
+        {
+            File files = new File("documents/0.pdf");
+
+
+            byte[] buf = new byte[512];
+            int len;
+
+            System.out.println("client : file name: " + files.getName());
+
+            fis = new FileInputStream(files);
+
+            while ((len = fis.read(buf)) != -1)
+            {
+                out.write(buf, 0, len);
+            }
+
+            out.flush();
+
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+
+        //Clean up
+        try
+        {
+            fis.close();
+            out.close();
+            in.close();
+            socket.close();
+        }
+        catch (IOException e)
+        {
+            System.out.println("Could not close.");
+            System.exit(-1);
+        }
 
     }
 

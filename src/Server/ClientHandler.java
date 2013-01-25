@@ -305,42 +305,7 @@ public class ClientHandler extends Thread
     private void downloadFile(String[] info)
     {
         System.out.println("Download file");
-        //me.sendFile();
-//        FileInputStream fis = null;
-//        try
-//        {
-//            System.out.println("download files");
-//            //        import java.net.*;
-//            //import java.io.*;
-//            // sendfile
-//            File myFile = new File("source.pdf");
-//            byte[] mybytearray = new byte[(int) myFile.length()];
-//            fis = new FileInputStream(myFile);
-//            BufferedInputStream bis = new BufferedInputStream(fis);
-//            bis.read(mybytearray, 0, mybytearray.length);
-//            OutputStream os = clientSock.getOutputStream();
-//            System.out.println("Sending...");
-//            os.write(mybytearray, 0, mybytearray.length);
-//            os.flush();
-//        }
-//        catch (FileNotFoundException ex)
-//        {
-//            Logger.getLogger(ClientHandler.class.getName()).log(Level.SEVERE, null, ex);
-//        }
-//        catch (IOException ex)
-//        {
-//        }
-//        finally
-//        {
-//            try
-//            {
-//                fis.close();
-//            }
-//            catch (IOException ex)
-//            {
-//                Logger.getLogger(ClientHandler.class.getName()).log(Level.SEVERE, null, ex);
-//            }
-//        }
+        me.sendFile();
     }
 
     /**
