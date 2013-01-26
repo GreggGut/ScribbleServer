@@ -97,17 +97,7 @@ public class Path
     {
         return color;
     }
-
-//    /**
-//     * Is the path active (should it be rendered)
-//     *
-//     * @return True if the path should be rendered, false otherwise
-//     */
-//    public boolean isActive()
-//    {
-//        //TODO this might be useless, will try to redo this without this flag
-//        return active;
-//    }
+    
     /**
      * Get all the points of this Path
      *

@@ -30,15 +30,10 @@ public class ScribbleClients
 
     synchronized public void addClient(User user)
     {
-        //TODO user will have a choice of the file to use, but for now we only work on the first file
-        //user.setmFile(mFiles.get(0));
-
         mClient.add(user);
-        //broadcast("Welcome a new chatter (" + cliAddr + ", " + port + ")");
     }
 
     synchronized public void delClient(String cliAddr, int port)
-    // remove the Chatter object for this person
     {
         User c;
         for (int i = 0; i < mClient.size(); i++)
@@ -48,7 +43,6 @@ public class ScribbleClients
             {
                 mClient.remove(i);
                 System.out.println("User " + cliAddr + " " + port + " logout");
-                //broadcast("(" + cliAddr + ", " + port + ") has departed");
                 break;
             }
         }

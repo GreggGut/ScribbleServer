@@ -244,7 +244,6 @@ public class ClientHandler extends Thread
             String username = info[2];
             String password = info[3];
 
-            //TODO implement the login function
             //TOCONF For now I am storing the username/password in a file. This would have to be implemented in a database.
             BufferedReader buffer = new BufferedReader(new FileReader("resources/credential"));
             String lineFromFile;
@@ -260,10 +259,21 @@ public class ClientHandler extends Thread
                     break;
                 }
             }
-            if (!loginFine)
+            String toSend = NetworkProtocol.split;
+            toSend += NetworkProtocol.LOGIN;
+            toSend += NetworkProtocol.split;
+            if (loginFine)
             {
-                //TODO send error message... should we terminate the connection? Maybe after x tries....
+                toSend += "1";
             }
+            else
+            {
+                toSend += "0";
+            }
+
+            toSend = encriptMessage(toSend);
+            me.sendMessage(toSend);
+
         }
         catch (FileNotFoundException ex)
         {
@@ -371,15 +381,6 @@ public class ClientHandler extends Thread
                 mode = false;
             }
             int color = Integer.parseInt(info[4]);
-//            boolean active;
-//            if (info[5].equals("1"))
-//            {
-//                active = true;
-//            }
-//            else
-//            {
-//                active = false;
-//            }
             int page = Integer.parseInt(info[5]);
             int width = Integer.parseInt(info[6]);
 
