@@ -5,7 +5,6 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import nu.xom.*;
 
 /**
  *
@@ -40,7 +39,9 @@ public class ClientHandler extends Thread
             PrintWriter out = new PrintWriter(clientSock.getOutputStream(), true);  // autoflush
 
             me = new User(cliAddr, port, out);
-            mClients.addClient(me);
+
+            // REMOVE TOCONF user will be added only once he logged if successfully
+//            mClients.addClient(me);
 
             processClient(in, out);            // interact with client
 
@@ -242,10 +243,10 @@ public class ClientHandler extends Thread
         {
             String username = info[2];
             String password = info[3];
-            
+
             //TODO implement the login function
             //TOCONF For now I am storing the username/password in a file. This would have to be implemented in a database.
-            BufferedReader buffer = new BufferedReader(new FileReader("credential"));
+            BufferedReader buffer = new BufferedReader(new FileReader("resources/credential"));
             String lineFromFile;
             boolean loginFine = false;
             while ((lineFromFile = buffer.readLine()) != null)
@@ -255,8 +256,13 @@ public class ClientHandler extends Thread
                 {
                     System.out.println("Login fine");
                     loginFine = true;
+                    mClients.addClient(me);
                     break;
                 }
+            }
+            if (!loginFine)
+            {
+                //TODO send error message... should we terminate the connection? Maybe after x tries....
             }
         }
         catch (FileNotFoundException ex)
@@ -324,8 +330,21 @@ public class ClientHandler extends Thread
 
     private void downloadFile(String[] info)
     {
-        System.out.println("Download file" + info);
-        me.sendFile();
+        ArrayList<SCFile> allFiles = mClients.getFiles();
+
+        SCFile mFile = null;
+        for (SCFile f : allFiles)
+        {
+            if (f.getName().equals(info[2]))
+            {
+                System.out.println("File      " + f.getName());
+                mFile = f;
+            }
+        }
+        if (mFile != null)
+        {
+            me.sendFile(mFile);
+        }
     }
 
     /**
@@ -544,6 +563,7 @@ public class ClientHandler extends Thread
 
     private void updateUserwithFileContent()
     {
+
         SCFile file = me.getmFile();
         System.out.println("Updating file");
         for (Page page : file.getPages())

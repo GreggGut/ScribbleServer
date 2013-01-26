@@ -5,8 +5,13 @@
 package Server;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.apache.pdfbox.pdmodel.PDDocument;
+//import org.apache.pdfbox.
 
 /**
  *
@@ -26,7 +31,7 @@ public class ScribbleClients
     synchronized public void addClient(User user)
     {
         //TODO user will have a choice of the file to use, but for now we only work on the first file
-        user.setmFile(mFiles.get(0));
+        //user.setmFile(mFiles.get(0));
 
         mClient.add(user);
         //broadcast("Welcome a new chatter (" + cliAddr + ", " + port + ")");
@@ -101,12 +106,26 @@ public class ScribbleClients
 
             if (file.isFile())
             {
-                //TODO Need to find a way how many pages the document has, for now using 10
-                int nPages = 10;
-                SCFile newFile = new SCFile(file.getName(), file.getPath(), nPages);
+                try
+                {
+                    //TOCONF This is only for PDF documents.... will we have any other type of documents?
+                    String fileName = file.getName();
+                    String extension = fileName.substring(fileName.lastIndexOf(".") + 1, fileName.length());
+                    if (extension.equals("pdf"))
+                    {
+                        PDDocument doc = PDDocument.load(file);
+                        int count = doc.getNumberOfPages();
+                        int nPages = count;
+                        SCFile newFile = new SCFile(file.getName(), file.getPath(), nPages);
 
-                mFiles.add(newFile);
-                System.out.println(file.getName() + " " + file.getPath());
+                        mFiles.add(newFile);
+                        System.out.println(file.getName() + " " + file.getPath() + " number of pages: " + count);
+                    }
+                }
+                catch (IOException ex)
+                {
+                    Logger.getLogger(ScribbleClients.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
         }
     }
@@ -131,5 +150,10 @@ public class ScribbleClients
         toBeSend = toBeSend.substring(0, toBeSend.length() - 1);
 
         return toBeSend;
+    }
+
+    synchronized public ArrayList<SCFile> getFiles()
+    {
+        return mFiles;
     }
 }

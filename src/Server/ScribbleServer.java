@@ -1,6 +1,12 @@
 package Server;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.net.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -9,7 +15,7 @@ import java.net.*;
 public class ScribbleServer
 {
 
-    static final int PORT = 21223;  // port for this server
+    static int PORT;// = 21223;  // port for this server
     private ScribbleClients mClients;
 
     public ScribbleServer()
@@ -39,6 +45,18 @@ public class ScribbleServer
      */
     public static void main(String[] args)
     {
+        try
+        {
+            BufferedReader buffer = new BufferedReader(new FileReader("resources/NetworkSetting.info"));
+            PORT = Integer.parseInt(buffer.readLine());
+        }
+        catch (FileNotFoundException ex)
+        {
+            Logger.getLogger(ScribbleServer.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        catch (IOException ex)
+        {
+        }
         new ScribbleServer();
     }
 }

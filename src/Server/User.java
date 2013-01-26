@@ -50,7 +50,7 @@ public class User
         out.println(msg);
     }
 
-    synchronized public void sendFile()
+    synchronized public void sendFile(SCFile mFile)
     {
         Socket socket = null;
         DataInputStream in = null;
@@ -76,7 +76,7 @@ public class User
 
         try
         {
-            File files = new File("documents/0.pdf");
+            File files = new File(mFile.getLocation());//"documents/" + filename);
 
 
             byte[] buf = new byte[512];
@@ -90,6 +90,9 @@ public class User
             {
                 out.write(buf, 0, len);
             }
+
+
+            this.setmFile(mFile);
 
             out.flush();
 
