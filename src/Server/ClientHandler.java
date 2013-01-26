@@ -261,16 +261,6 @@ public class ClientHandler extends Thread
             me.getmFile().setPresentOwner(me);
             mClients.broadcast(line, me, true);
         }
-        //TOCONF This might be needed but for now it is removed
-//                else
-//                {
-//                    String toSend = ClientToServer.split;
-//                    toSend += ServerToClient.DISALLOW_OWNERSHIP;
-//
-//                    toSend = encriptMessage(toSend);
-//
-//                    me.sendMessage(toSend);
-//                }
     }
 
     /**
@@ -304,7 +294,7 @@ public class ClientHandler extends Thread
 
     private void downloadFile(String[] info)
     {
-        System.out.println("Download file");
+        System.out.println("Download file"+ info);
         me.sendFile();
     }
 
