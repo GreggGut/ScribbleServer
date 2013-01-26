@@ -3,6 +3,9 @@ package Server;
 import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import nu.xom.*;
 
 /**
  *
@@ -235,7 +238,34 @@ public class ClientHandler extends Thread
     private void login(String[] info)
     {
         System.out.println("Login, Not implemented");
-        //TODO implement the login function
+        try
+        {
+            String username = info[2];
+            String password = info[3];
+            
+            //TODO implement the login function
+            //TOCONF For now I am storing the username/password in a file. This would have to be implemented in a database.
+            BufferedReader buffer = new BufferedReader(new FileReader("credential"));
+            String lineFromFile;
+            boolean loginFine = false;
+            while ((lineFromFile = buffer.readLine()) != null)
+            {
+                String cr[] = lineFromFile.split(",");
+                if (cr.length == 2 && cr[0].equals(username) && cr[1].equals(password))
+                {
+                    System.out.println("Login fine");
+                    loginFine = true;
+                    break;
+                }
+            }
+        }
+        catch (FileNotFoundException ex)
+        {
+            Logger.getLogger(ClientHandler.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        catch (IOException ex)
+        {
+        }
     }
 
     /**
@@ -294,7 +324,7 @@ public class ClientHandler extends Thread
 
     private void downloadFile(String[] info)
     {
-        System.out.println("Download file"+ info);
+        System.out.println("Download file" + info);
         me.sendFile();
     }
 
