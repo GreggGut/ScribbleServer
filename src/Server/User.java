@@ -50,6 +50,58 @@ public class User
         out.println(msg);
     }
 
+    private String encriptMessage(String toSend)
+    {
+        String header = String.format("%4d", toSend.length() + 1);
+        toSend = header + toSend;
+        return toSend;
+    }
+
+    synchronized public void sendFile2(SCFile mFile)
+    {
+        FileInputStream fis = null;
+        try
+        {
+            File files = new File(mFile.getLocation());//"documents/" + filename);
+
+
+            byte[] buf = new byte[500];
+            int len;
+
+            System.out.println("client : file name: " + files.getName());
+
+            fis = new FileInputStream(files);
+
+            while ((len = fis.read(buf)) != -1)
+            {
+                String toSend = NetworkProtocol.split;
+                toSend += NetworkProtocol.DOWNLOAD_FILE;
+                toSend += NetworkProtocol.split;
+
+                String str = new String(buf, "UTF-8");
+
+                toSend += str;
+                toSend = encriptMessage(toSend);
+                sendMessage(toSend);//write(buf, 0, len);
+            }
+            
+            String toSend = NetworkProtocol.split;
+            toSend += NetworkProtocol.DOWNLOAD_FILE_DONE;
+            encriptMessage(toSend);
+            sendMessage(toSend);
+
+
+            this.setmFile(mFile);
+
+            //out.flush();
+
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+    }
+
     synchronized public void sendFile(SCFile mFile)
     {
         Socket socket = null;
@@ -57,9 +109,11 @@ public class User
         DataOutputStream out = null;
         FileInputStream fis = null;
 
+
+
         try
         {
-            socket = new Socket("127.0.0.1", 34567);
+            socket = new Socket(clientAdd, 34567);
             in = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
             out = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
         }

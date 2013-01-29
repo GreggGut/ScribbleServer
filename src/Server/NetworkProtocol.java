@@ -32,6 +32,7 @@ public class NetworkProtocol
     public static final int DELETE_PATH = 11;
     public static final int CLEAR_ALL = 12;
     public static final int UPDATE_FILE=13;
+    public static final int DOWNLOAD_FILE_DONE=14;
     /**
      * User to split the info received from the clients
      */

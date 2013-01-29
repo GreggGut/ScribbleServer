@@ -11,7 +11,6 @@ import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.pdfbox.pdmodel.PDDocument;
-//import org.apache.pdfbox.
 
 /**
  *
@@ -109,6 +108,7 @@ public class ScribbleClients
                     {
                         PDDocument doc = PDDocument.load(file);
                         int count = doc.getNumberOfPages();
+                        doc.close();
                         int nPages = count;
                         SCFile newFile = new SCFile(file.getName(), file.getPath(), nPages);
 
@@ -129,8 +129,6 @@ public class ScribbleClients
         String toBeSend = NetworkProtocol.split;
         toBeSend += NetworkProtocol.GET_FILE_LIST;
         toBeSend += NetworkProtocol.split;
-
-        //user.increaseClientExpectsRequestID();
 
         /**
          * Creating a text file will all the files available to the user

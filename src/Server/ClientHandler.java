@@ -64,11 +64,9 @@ public class ClientHandler extends Thread
      */
     {
         String line;
-        boolean done = false;
-        //transformPath();
         try
         {
-            while ((line = in.readLine()) != null)//!done)
+            while ((line = in.readLine()) != null)
             {
                 //line = in.readLine();
                 decodeRequest(line);
@@ -353,7 +351,8 @@ public class ClientHandler extends Thread
         }
         if (mFile != null)
         {
-            me.sendFile(mFile);
+            //TESTING
+            me.sendFile2(mFile);
         }
     }
 
@@ -481,26 +480,26 @@ public class ClientHandler extends Thread
     private void redo(String[] info, String line)
     {
         System.out.println("redo");
-        if (info.length > 4)
+
+        try
         {
-            try
-            {
-                /**
-                 * Parsing all the received info
-                 */
-                int page = Integer.parseInt(info[2]);
+            /**
+             * Parsing all the received info
+             */
+            int page = Integer.parseInt(info[2]);
 
-                //Remove the last item, the undo action from the list
-                me.getmFile().getPages().get(page).getPaths().remove(me.getmFile().getPages().get(page).getPaths().size() - 1);
+            Path newPath = new Path(Path.REDO, page);
+            me.getmFile().getPages().get(page).addPath(newPath);
+            //Remove the last item, the undo action from the list
+            //me.getmFile().getPages().get(page).getPaths().remove(me.getmFile().getPages().get(page).getPaths().size() - 1);
 
-                mClients.broadcast(line, me, false);
-            }
-            catch (NumberFormatException x)
-            {
-                /**
-                 * Failed parsing, this request will be ignored
-                 */
-            }
+            mClients.broadcast(line, me, false);
+        }
+        catch (NumberFormatException x)
+        {
+            /**
+             * Failed parsing, this request will be ignored
+             */
         }
     }
 
