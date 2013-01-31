@@ -38,10 +38,7 @@ public class ClientHandler extends Thread
             BufferedReader in = new BufferedReader(new InputStreamReader(clientSock.getInputStream()));
             PrintWriter out = new PrintWriter(clientSock.getOutputStream(), true);  // autoflush
 
-            me = new User(cliAddr, port, out);
-
-            // REMOVE TOCONF user will be added only once he logged if successfully
-//            mClients.addClient(me);
+            me = new User(cliAddr, port, out, clientSock);
 
             processClient(in, out);            // interact with client
 
@@ -94,7 +91,7 @@ public class ClientHandler extends Thread
         //Remove all spaces
         String decodeLine = line.trim();
 
-        //System.out.println("Received in Packet Analyzer: " + line);
+        System.out.println("Received in Packet Analyzer: " + line);
         /**
          * separating received data into readable information
          */
@@ -336,23 +333,22 @@ public class ClientHandler extends Thread
         me.sendMessage(toSend);
     }
 
+    /**
+     * This function doesn't do the actual download, it just sets the user file
+     * @param info
+     */
     private void downloadFile(String[] info)
     {
         ArrayList<SCFile> allFiles = mClients.getFiles();
 
-        SCFile mFile = null;
         for (SCFile f : allFiles)
         {
             if (f.getName().equals(info[2]))
             {
                 System.out.println("File      " + f.getName());
-                mFile = f;
+                me.setmFile(f);
+                break;
             }
-        }
-        if (mFile != null)
-        {
-            //TESTING
-            me.sendFile2(mFile);
         }
     }
 
@@ -561,6 +557,9 @@ public class ClientHandler extends Thread
         return toSend;
     }
 
+    /**
+     * This file sends all the paths on the whole document to the user
+     */
     private void updateUserwithFileContent()
     {
 
@@ -667,7 +666,5 @@ public class ClientHandler extends Thread
         endpath += NetworkProtocol.END_PATH;
         endpath = encriptMessage(endpath);
         me.sendMessage(endpath);
-
-        //return mPath;
     }
 }

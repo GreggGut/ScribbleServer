@@ -99,26 +99,30 @@ public class ScribbleClients
 
             if (file.isFile())
             {
-                try
+                //try
                 {
                     //TOCONF This is only for PDF documents.... will we have any other type of documents?
                     String fileName = file.getName();
                     String extension = fileName.substring(fileName.lastIndexOf(".") + 1, fileName.length());
                     if (extension.equals("pdf"))
                     {
-                        PDDocument doc = PDDocument.load(file);
-                        int count = doc.getNumberOfPages();
-                        doc.close();
-                        int nPages = count;
-                        SCFile newFile = new SCFile(file.getName(), file.getPath(), nPages);
+                        try
+                        {
+                            PDDocument doc = PDDocument.load(file);
+                            int count = doc.getNumberOfPages();
+                            doc.close();
+                            int nPages = count;
+                            SCFile newFile = new SCFile(file.getName(), file.getPath(), nPages);
 
-                        mFiles.add(newFile);
-                        System.out.println(file.getName() + " " + file.getPath() + " number of pages: " + count);
+                            mFiles.add(newFile);
+                            System.out.println(file.getName() + " " + file.getPath() + " number of pages: " + nPages);
+                        }
+                        catch (IOException ex)
+                        {
+                            //Logger.getLogger(ScribbleClients.class.getName()).log(Level.SEVERE, null, ex);
+                            System.out.println("Failed opening the "+file.getName()+ " PDF, this file will be ignored");
+                        }
                     }
-                }
-                catch (IOException ex)
-                {
-                    Logger.getLogger(ScribbleClients.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
         }

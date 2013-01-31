@@ -27,12 +27,14 @@ public class User
     private PrintWriter out;
     private SCFile mFile;
     private Path workingPath;
+    Socket clientSock;
 
-    User(String clientAdd, int port, PrintWriter out)
+    User(String clientAdd, int port, PrintWriter out, Socket clientSock)
     {
         this.clientAdd = clientAdd;
         this.port = port;
         this.out = out;
+        this.clientSock = clientSock;
     }
 
     public boolean matches(String ca, int p)
@@ -57,59 +59,12 @@ public class User
         return toSend;
     }
 
-    synchronized public void sendFile2(SCFile mFile)
-    {
-        FileInputStream fis = null;
-        try
-        {
-            File files = new File(mFile.getLocation());//"documents/" + filename);
-
-
-            byte[] buf = new byte[500];
-            int len;
-
-            System.out.println("client : file name: " + files.getName());
-
-            fis = new FileInputStream(files);
-
-            while ((len = fis.read(buf)) != -1)
-            {
-                String toSend = NetworkProtocol.split;
-                toSend += NetworkProtocol.DOWNLOAD_FILE;
-                toSend += NetworkProtocol.split;
-
-                String str = new String(buf, "UTF-8");
-
-                toSend += str;
-                toSend = encriptMessage(toSend);
-                sendMessage(toSend);//write(buf, 0, len);
-            }
-            
-            String toSend = NetworkProtocol.split;
-            toSend += NetworkProtocol.DOWNLOAD_FILE_DONE;
-            encriptMessage(toSend);
-            sendMessage(toSend);
-
-
-            this.setmFile(mFile);
-
-            //out.flush();
-
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-        }
-    }
-
     synchronized public void sendFile(SCFile mFile)
     {
         Socket socket = null;
         DataInputStream in = null;
         DataOutputStream out = null;
         FileInputStream fis = null;
-
-
 
         try
         {
@@ -132,7 +87,6 @@ public class User
         {
             File files = new File(mFile.getLocation());//"documents/" + filename);
 
-
             byte[] buf = new byte[512];
             int len;
 
@@ -145,11 +99,8 @@ public class User
                 out.write(buf, 0, len);
             }
 
-
             this.setmFile(mFile);
-
             out.flush();
-
         }
         catch (IOException e)
         {

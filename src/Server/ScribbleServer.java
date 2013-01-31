@@ -22,6 +22,7 @@ public class ScribbleServer
     // wait for a client connection, spawn a thread, repeat
     {
         mClients = new ScribbleClients();
+        new FileDownloader(mClients).start();
         try
         {
             ServerSocket serverSock = new ServerSocket(PORT);
