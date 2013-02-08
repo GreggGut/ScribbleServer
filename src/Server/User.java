@@ -17,7 +17,7 @@ import java.net.UnknownHostException;
 
 /**
  *
- * @author Grzegorz Gut <Gregg.Gut@gmail.com>
+ *  @author Grzegorz Gut <Gregg.Gut@gmail.com>
  */
 public class User
 {
@@ -27,7 +27,8 @@ public class User
     private PrintWriter out;
     private SCFile mFile;
     private Path workingPath;
-    Socket clientSock;
+    private Socket clientSock;
+    private String username;
 
     User(String clientAdd, int port, PrintWriter out, Socket clientSock)
     {
@@ -148,5 +149,15 @@ public class User
     public void setWorkingPath(Path workingPath)
     {
         this.workingPath = workingPath;
+    }
+
+    public String getUsername()
+    {
+        return username;
+    }
+
+    public void setUsername(String username)
+    {
+        this.username=username;
     }
 }

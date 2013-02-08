@@ -1,6 +1,8 @@
 package Server;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 
 /**
  *
@@ -11,11 +13,11 @@ public class Page
 
     //private int pageNumber;
     //private SCFile mParentFile;
-    private ArrayList<Path> mPaths = new ArrayList<Path>();
+    private Collection<Path> mPaths = new ArrayList<Path>();
+    private Collection<Path> mSavedPaths = new ArrayList<Path>();
 
     /**
      * Default constructor
-     * TOCONF For now this is only a collection of paths, should there be anything else here?
      */
     Page()
     {
@@ -36,23 +38,27 @@ public class Page
      *
      * @return An ArrayList of all the Paths on this page
      */
-    public ArrayList<Path> getPaths()
+    public Collection<Path> getPaths()
     {
         return mPaths;
     }
 
-    public void removeLastPath()
+    public Collection<Path> getPathsToSave()
     {
-        //mPaths.remove(mPaths.size() - 1);
+        Collection<Path> toReturn = new ArrayList<Path>(mPaths);
+        toReturn.removeAll(mSavedPaths);
+        mSavedPaths.addAll(toReturn);
+        return toReturn;
     }
 
     public void deletePath(int pathID)
     {
-        for (int i = 0; i < mPaths.size(); i++)
+        Iterator<Path> pathIterator = mPaths.iterator();
+        while (pathIterator.hasNext())
         {
-            if (mPaths.get(i).getId() == pathID)
+            if (pathIterator.next().getId() == pathID)
             {
-                mPaths.remove(i);
+                pathIterator.remove();
                 break;
             }
         }
@@ -61,5 +67,15 @@ public class Page
     public void clearPage()
     {
         mPaths.clear();
+    }
+
+    public Collection<Path> getSavedPaths()
+    {
+        return mSavedPaths;
+    }
+
+    public void addToSavedPaths(Collection<Path> saved)
+    {
+        mSavedPaths.addAll(saved);
     }
 }

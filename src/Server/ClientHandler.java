@@ -18,6 +18,7 @@ public class ClientHandler extends Thread
     private int port;
     private ScribbleClients mClients;
     private User me;
+    private boolean logoutRequest = false;
 
     ClientHandler(Socket socket, ScribbleClients mClients)
     {
@@ -46,6 +47,8 @@ public class ClientHandler extends Thread
             mClients.delClient(cliAddr, port);       // remove client details
             clientSock.close();
             System.out.println("Client (" + cliAddr + ", " + port + ") connection closed\n");
+            //TESTING
+            me.getmFile().saveFileContent();
         }
         catch (Exception e)
         {
@@ -63,7 +66,7 @@ public class ClientHandler extends Thread
         String line;
         try
         {
-            while ((line = in.readLine()) != null)
+            while (!logoutRequest && (line = in.readLine()) != null)
             {
                 //line = in.readLine();
                 decodeRequest(line);
@@ -91,7 +94,7 @@ public class ClientHandler extends Thread
         //Remove all spaces
         String decodeLine = line.trim();
 
-        System.out.println("Received in Packet Analyzer: " + line);
+        //System.out.println("Received in Packet Analyzer: " + line);
         /**
          * separating received data into readable information
          */
@@ -130,7 +133,7 @@ public class ClientHandler extends Thread
                  * Logout logout
                  */
                 case NetworkProtocol.LOGOUT:
-                    logout(info);
+                    logout(line);
                     break;
 
                 /**
@@ -158,7 +161,7 @@ public class ClientHandler extends Thread
                     break;
 
                 /**
-                 * Download file TOCONF what will we do about this?
+                 * Download file This does not do the actual download, just sets the user working file
                  */
                 case NetworkProtocol.DOWNLOAD_FILE:
                     downloadFile(info);
@@ -250,6 +253,7 @@ public class ClientHandler extends Thread
                 {
                     System.out.println("Login fine");
                     loginFine = true;
+                    me.setUsername(username);
                     mClients.addClient(me);
                     break;
                 }
@@ -283,10 +287,11 @@ public class ClientHandler extends Thread
      *
      * @param info logout
      */
-    private void logout(String[] info)
+    private void logout(String line)
     {
         System.out.println("Logout, Not implemented");
-        //TODO implement the logout function
+        me.sendMessage(line);
+        logoutRequest = true;
     }
 
     /**
@@ -335,6 +340,7 @@ public class ClientHandler extends Thread
 
     /**
      * This function doesn't do the actual download, it just sets the user file
+     *
      * @param info
      */
     private void downloadFile(String[] info)
@@ -589,6 +595,25 @@ public class ClientHandler extends Thread
                 }
             }
         }
+
+        //sedning who is the owner
+        if (me.getmFile().getPresentOwner() == null)
+        {
+            String toSend = NetworkProtocol.split;
+            toSend += NetworkProtocol.RELEASE_OWNERSHIP;
+            toSend = encriptMessage(toSend);
+            me.sendMessage(toSend);
+        }
+        else
+        {
+            String toSend = NetworkProtocol.split;
+            toSend += NetworkProtocol.REQUEST_OWNERSHIP;
+            toSend += NetworkProtocol.split;
+            toSend += me.getmFile().getPresentOwner().getUsername();
+            toSend = encriptMessage(toSend);
+            me.sendMessage(toSend);
+        }
+
         System.out.println("Updating file ended");
     }
 

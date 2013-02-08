@@ -4,7 +4,20 @@
  */
 package Server;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.Reader;
+import java.io.UnsupportedEncodingException;
+import java.io.Writer;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -36,6 +49,7 @@ public class SCFile
             Page p = new Page();
             mPages.add(p);
         }
+        loadFileContent();
     }
 
     /**
@@ -111,5 +125,157 @@ public class SCFile
     public void removeUser(User removeUser)
     {
         mActiveUsers.remove(removeUser);
+    }
+
+    //TODO I need to design and implement this
+    public void saveFileContent()
+    {
+
+        Writer out = null;
+        try
+        {
+            String savedName = name.substring(0, name.length() - 4).concat(".scf");
+            System.out.println(savedName);
+            out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("documents//" + savedName, true), "UTF-8"));
+            for (Page page : mPages)
+            {
+                for (Path path : page.getPathsToSave())
+                {
+                    String toSave = getPathInfo(path);
+                    out.write(toSave + '\n');
+                }
+            }
+        }
+        catch (UnsupportedEncodingException ex)
+        {
+            Logger.getLogger(SCFile.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        catch (FileNotFoundException ex)
+        {
+            Logger.getLogger(SCFile.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        catch (IOException ex)
+        {
+            Logger.getLogger(SCFile.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        finally
+        {
+            try
+            {
+                out.close();
+            }
+            catch (IOException ex)
+            {
+                Logger.getLogger(SCFile.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+
+    }
+
+    private String getPathInfo(Path path)
+    {
+        String toSave = String.valueOf(path.getPage());
+        toSave += ",";
+        int type = path.getType();
+        toSave += type;
+        toSave += ",";
+        if (type == Path.PATH)
+        {
+            toSave += path.getId();
+            toSave += ",";
+            toSave += path.getMode();
+            toSave += ",";
+            toSave += path.getColor();
+            toSave += ",";
+            toSave += path.getWidth();
+            toSave += ",";
+
+            //Get all the parameters of the file
+            for (Point point : path.getmPoints())
+            {
+                toSave += point.x();
+                toSave += "-";
+                toSave += point.y();
+                toSave += "-";
+            }
+            //toSave = toSave.substring(0, toSave.length() - 2);
+        }
+
+
+        return toSave;
+    }
+
+    private void loadFileContent()
+    {
+        Reader in = null;
+        BufferedReader mBuffer = null;
+        try
+        {
+            String savedName = name.substring(0, name.length() - 4).concat(".scf");
+            System.out.println(savedName);
+            in = new InputStreamReader(new FileInputStream("documents//" + savedName), "UTF-8");
+            mBuffer = new BufferedReader(in);
+            String line;
+            while ((line = mBuffer.readLine()) != null)
+            {
+                decodeLine(line);
+            }
+        }
+        catch (FileNotFoundException ex)
+        {
+            Logger.getLogger(SCFile.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        catch (UnsupportedEncodingException ex)
+        {
+            Logger.getLogger(SCFile.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        catch (IOException ex)
+        {
+            Logger.getLogger(SCFile.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        finally
+        {
+            try
+            {
+                mBuffer.close();
+                in.close();
+            }
+            catch (IOException ex)
+            {
+                Logger.getLogger(SCFile.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }
+
+    private void decodeLine(String line)
+    {
+        String[] parts = line.split(",");
+        int page = Integer.parseInt(parts[0]);
+        short type = Short.parseShort(parts[1]);
+        Path newPath;
+        if (type == Path.PATH)
+        {
+            int pathID = Integer.parseInt(parts[2]);
+            boolean mode = Boolean.parseBoolean(parts[3]);
+            int color = Integer.parseInt(parts[4]);
+            int width = Integer.parseInt(parts[5]);
+
+
+            String[] allPoints = parts[6].split("-");
+            newPath = new Path(width, mode, color, width, page);
+            for (int i = 0; i < allPoints.length;)
+            {
+                int x = Integer.parseInt(allPoints[i++]);
+                int y = Integer.parseInt(allPoints[i++]);
+                Point newPoint = new Point(x, y);
+                newPath.AddPoint(newPoint);
+            }
+        }
+        else
+        {
+            newPath = new Path(type, page);
+        }
+        getPages().get(page).addPath(newPath);
+
     }
 }
