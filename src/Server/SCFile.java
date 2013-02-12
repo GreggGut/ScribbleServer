@@ -128,6 +128,7 @@ public class SCFile
     }
 
     //TODO I need to design and implement this
+    //Best choice would be to store info into files in real time - As soon as it comes
     public void saveFileContent()
     {
 

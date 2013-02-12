@@ -120,112 +120,120 @@ public class ClientHandler extends Thread
                 return;
             }
 
-            switch (choice)
+            try
             {
-                /**
-                 * Login Info will contain the following login - password - port
-                 */
-                case NetworkProtocol.LOGIN:
-                    login(info);
-                    break;
+                switch (choice)
+                {
+                    /**
+                     * Login Info will contain the following login - password - port
+                     */
+                    case NetworkProtocol.LOGIN:
+                        login(info);
+                        break;
 
-                /**
-                 * Logout logout
-                 */
-                case NetworkProtocol.LOGOUT:
-                    logout(line);
-                    break;
+                    /**
+                     * Logout logout
+                     */
+                    case NetworkProtocol.LOGOUT:
+                        logout(line);
+                        break;
 
-                /**
-                 * Request Ownership requestOwnership - ID
-                 */
-                case NetworkProtocol.REQUEST_OWNERSHIP:
-                    requestOwnership(line);
+                    /**
+                     * Request Ownership requestOwnership - ID
+                     */
+                    case NetworkProtocol.REQUEST_OWNERSHIP:
+                        requestOwnership(line);
 
-                    break;
+                        break;
 
-                /**
-                 * Release Ownership releaseOwnership
-                 */
-                case NetworkProtocol.RELEASE_OWNERSHIP:
-                    releaseOwnership(line);
+                    /**
+                     * Release Ownership releaseOwnership
+                     */
+                    case NetworkProtocol.RELEASE_OWNERSHIP:
+                        releaseOwnership(line);
 
-                    break;
+                        break;
 
-                /**
-                 * Get file list getFileList
-                 */
-                case NetworkProtocol.GET_FILE_LIST:
-                    getFileList();
+                    /**
+                     * Get file list getFileList
+                     */
+                    case NetworkProtocol.GET_FILE_LIST:
+                        getFileList();
 
-                    break;
+                        break;
 
-                /**
-                 * Download file This does not do the actual download, just sets the user working file
-                 */
-                case NetworkProtocol.DOWNLOAD_FILE:
-                    downloadFile(info);
-                    break;
+                    /**
+                     * Download file This does not do the actual download, just sets the user working file
+                     */
+                    case NetworkProtocol.DOWNLOAD_FILE:
+                        downloadFile(info);
+                        break;
 
-                /**
-                 * New Path newPath - pathID - mode - color - active - page
-                 */
-                case NetworkProtocol.NEW_PATH:
-                    newPath(info, line);
+                    /**
+                     * New Path newPath - pathID - mode - color - active - page
+                     */
+                    case NetworkProtocol.NEW_PATH:
+                        newPath(info, line);
 
-                    break;
+                        break;
 
-                /**
-                 * Add point to path AddPoints - numberOfPoints - Points
-                 */
-                case NetworkProtocol.ADD_POINTS:
-                    addPoint(info, line);
+                    /**
+                     * Add point to path AddPoints - numberOfPoints - Points
+                     */
+                    case NetworkProtocol.ADD_POINTS:
+                        addPoint(info, line);
 
-                    break;
+                        break;
 
-                /**
-                 * End current path EndPath - pathID
-                 */
-                case NetworkProtocol.END_PATH:
-                    endPath(line);
-                    break;
+                    /**
+                     * End current path EndPath - pathID
+                     */
+                    case NetworkProtocol.END_PATH:
+                        endPath(line);
+                        break;
 
-                /**
-                 * undo last action Undo - page - pathID
-                 */
-                case NetworkProtocol.UNDO:
-                    undo(info, line);
-                    break;
+                    /**
+                     * undo last action Undo - page - pathID
+                     */
+                    case NetworkProtocol.UNDO:
+                        undo(info, line);
+                        break;
 
-                /**
-                 * redo last action Redo - page - pathID
-                 */
-                case NetworkProtocol.REDO:
-                    //System.out.println("Redo, should not be here since redo will simply resend the whole path");
-                    redo(info, line);
-                    break;
+                    /**
+                     * redo last action Redo - page - pathID
+                     */
+                    case NetworkProtocol.REDO:
+                        //System.out.println("Redo, should not be here since redo will simply resend the whole path");
+                        redo(info, line);
+                        break;
 
-                /**
-                 * delete path Delete - page - pathID
-                 *
-                 * TOCONFIRM How will we implement the delete function?
-                 */
-                case NetworkProtocol.DELETE_PATH:
-                    deletePath(info, line);
+                    /**
+                     * delete path Delete - page - pathID
+                     *
+                     * TOCONFIRM How will we implement the delete function?
+                     */
+                    case NetworkProtocol.DELETE_PATH:
+                        deletePath(info, line);
 
-                    break;
+                        break;
 
-                case NetworkProtocol.CLEAR_ALL:
-                    clearAll(info, line);
+                    case NetworkProtocol.CLEAR_ALL:
+                        clearAll(info, line);
 
-                    break;
+                        break;
 
-                case NetworkProtocol.UPDATE_FILE:
-                    updateUserwithFileContent();
-                    break;
-                default:
-                    System.out.println("Should NOT be here....");
-                    break;
+                    case NetworkProtocol.UPDATE_FILE:
+                        updateUserwithFileContent();
+                        break;
+                    default:
+                        System.out.println("Should NOT be here....");
+                        break;
+                }
+            }
+            catch (NullPointerException x)
+            {
+                System.out.println("NullPointerException");
+                x.printStackTrace();
             }
         }
     }
