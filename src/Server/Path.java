@@ -25,6 +25,7 @@ public class Path
     public static short PATH = 0;
     public static short UNDO = 1;
     public static short REDO = 2;
+    public static short CLEARALL = 3;
 
     /**
      * Default constructor
@@ -97,7 +98,7 @@ public class Path
     {
         return color;
     }
-    
+
     /**
      * Get all the points of this Path
      *

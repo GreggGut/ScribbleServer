@@ -14,21 +14,33 @@ public class Page
     //private int pageNumber;
     //private SCFile mParentFile;
     private Collection<Path> mPaths = new ArrayList<Path>();
-    private Collection<Path> mSavedPaths = new ArrayList<Path>();
+    private SCFile mFile;
 
     /**
      * Default constructor
      */
-    Page()
+    Page(SCFile file)
     {
+        mFile = file;
     }
 
     /**
-     * Add a path to this page
+     * Add a path to this page, only new paths
      *
      * @param path
      */
-    public void addPath(Path path)
+    protected void addPath(Path path)
+    {
+        mPaths.add(path);
+        mFile.saveFileContent(path);
+    }
+
+    /**
+     * This function restores paths from the Scribble File Type (.scf) at startup
+     *
+     * @param path
+     */
+    protected void restorePath(Path path)
     {
         mPaths.add(path);
     }
@@ -41,14 +53,6 @@ public class Page
     public Collection<Path> getPaths()
     {
         return mPaths;
-    }
-
-    public Collection<Path> getPathsToSave()
-    {
-        Collection<Path> toReturn = new ArrayList<Path>(mPaths);
-        toReturn.removeAll(mSavedPaths);
-        mSavedPaths.addAll(toReturn);
-        return toReturn;
     }
 
     public void deletePath(int pathID)
@@ -67,15 +71,5 @@ public class Page
     public void clearPage()
     {
         mPaths.clear();
-    }
-
-    public Collection<Path> getSavedPaths()
-    {
-        return mSavedPaths;
-    }
-
-    public void addToSavedPaths(Collection<Path> saved)
-    {
-        mSavedPaths.addAll(saved);
     }
 }

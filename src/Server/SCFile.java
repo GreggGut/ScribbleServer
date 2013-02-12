@@ -31,6 +31,7 @@ public class SCFile
     private ArrayList<Page> mPages = new ArrayList<Page>();
     private ArrayList<User> mActiveUsers = new ArrayList<User>();
     private User presentOwner = null;
+    private Writer out = null;
 
     /**
      * Default constructor
@@ -46,10 +47,33 @@ public class SCFile
 
         for (int i = 0; i < nPages; i++)
         {
-            Page p = new Page();
+            Page p = new Page(this);
             mPages.add(p);
         }
         loadFileContent();
+        openSaveFile();
+    }
+
+    private void openSaveFile()
+    {
+        try
+        {
+            String savedName = name.substring(0, name.length() - 4).concat(".scf");
+            System.out.println(savedName);
+            out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("documents/" + savedName, true), "UTF-8"));
+        }
+        catch (UnsupportedEncodingException ex)
+        {
+            Logger.getLogger(SCFile.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        catch (FileNotFoundException ex)
+        {
+            Logger.getLogger(SCFile.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        catch (IOException ex)
+        {
+            Logger.getLogger(SCFile.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     /**
@@ -62,6 +86,11 @@ public class SCFile
         return name;
     }
 
+    //TOCONF this might be a better way of coding. Add path to file, and the file determines where to place it (on which page)
+//    public void addPath(int page, Path path)
+//    {
+//        mPages.get(page).addPath(path);
+//    }
     /**
      * Get the file location on the server
      *
@@ -129,50 +158,35 @@ public class SCFile
 
     //TODO I need to design and implement this
     //Best choice would be to store info into files in real time - As soon as it comes
-    public void saveFileContent()
+    synchronized public void saveFileContent(Path path)
     {
 
-        Writer out = null;
         try
         {
-            String savedName = name.substring(0, name.length() - 4).concat(".scf");
-            System.out.println(savedName);
-            out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("documents//" + savedName, true), "UTF-8"));
-            for (Page page : mPages)
-            {
-                for (Path path : page.getPathsToSave())
-                {
-                    String toSave = getPathInfo(path);
-                    out.write(toSave + '\n');
-                }
-            }
-        }
-        catch (UnsupportedEncodingException ex)
-        {
-            Logger.getLogger(SCFile.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        catch (FileNotFoundException ex)
-        {
-            Logger.getLogger(SCFile.class.getName()).log(Level.SEVERE, null, ex);
+            String toSave = getPathInfo(path);
+            out.write(toSave);
+            out.flush();
         }
         catch (IOException ex)
         {
             Logger.getLogger(SCFile.class.getName()).log(Level.SEVERE, null, ex);
         }
-        finally
-        {
-            try
-            {
-                out.close();
-            }
-            catch (IOException ex)
-            {
-                Logger.getLogger(SCFile.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
-
     }
 
+    //TOCONF does this really work?
+//    @Override
+//    protected void finalize()
+//    {
+//        System.out.println("In finalize");
+//        try
+//        {
+//            out.close();
+//        }
+//        catch (IOException ex)
+//        {
+//            Logger.getLogger(SCFile.class.getName()).log(Level.SEVERE, null, ex);
+//        }
+//    }
     private String getPathInfo(Path path)
     {
         String toSave = String.valueOf(path.getPage());
@@ -201,7 +215,7 @@ public class SCFile
             }
             //toSave = toSave.substring(0, toSave.length() - 2);
         }
-
+        toSave += '\n';
 
         return toSave;
     }
@@ -245,6 +259,9 @@ public class SCFile
             {
                 Logger.getLogger(SCFile.class.getName()).log(Level.SEVERE, null, ex);
             }
+            catch (NullPointerException x)
+            {
+            }
         }
     }
 
@@ -276,7 +293,7 @@ public class SCFile
         {
             newPath = new Path(type, page);
         }
-        getPages().get(page).addPath(newPath);
+        getPages().get(page).restorePath(newPath);
 
     }
 }

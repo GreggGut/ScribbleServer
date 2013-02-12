@@ -47,8 +47,6 @@ public class ClientHandler extends Thread
             mClients.delClient(cliAddr, port);       // remove client details
             clientSock.close();
             System.out.println("Client (" + cliAddr + ", " + port + ") connection closed\n");
-            //TESTING
-            me.getmFile().saveFileContent();
         }
         catch (Exception e)
         {
@@ -397,7 +395,6 @@ public class ClientHandler extends Thread
                      * , active
                      */, width, page);
 
-            me.getmFile().getPages().get(page).addPath(path);
             me.setWorkingPath(path);
 
             //If everything got parsed then we can forward it to all clients
@@ -446,6 +443,7 @@ public class ClientHandler extends Thread
      */
     private void endPath(String line)
     {
+        me.getmFile().getPages().get(me.getWorkingPath().getPage()).addPath(me.getWorkingPath());
         me.setWorkingPath(null);
 
         mClients.broadcast(line, me, false);
@@ -473,7 +471,6 @@ public class ClientHandler extends Thread
             me.getmFile().getPages().get(page).addPath(newPath);
 
             mClients.broadcast(line, me, false);
-
         }
         catch (NumberFormatException x)
         {
@@ -552,7 +549,9 @@ public class ClientHandler extends Thread
              */
             int page = Integer.parseInt(info[2]);
 
-            me.getmFile().getPages().get(page).clearPage();
+            //me.getmFile().getPages().get(page).clearPage();
+            Path newPath = new Path(Path.CLEARALL, page);
+            me.getmFile().getPages().get(page).addPath(newPath);
 
             mClients.broadcast(line, me, false);
         }
@@ -598,6 +597,13 @@ public class ClientHandler extends Thread
                 {
                     String toSend = NetworkProtocol.split;
                     toSend += NetworkProtocol.REDO;
+                    toSend = encriptMessage(toSend);
+                    me.sendMessage(toSend);
+                }
+                else if (path.getType() == Path.CLEARALL)
+                {
+                    String toSend = NetworkProtocol.split;
+                    toSend += NetworkProtocol.CLEAR_ALL;
                     toSend = encriptMessage(toSend);
                     me.sendMessage(toSend);
                 }

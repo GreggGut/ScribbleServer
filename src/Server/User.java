@@ -121,7 +121,6 @@ public class User
             System.out.println("Could not close.");
             System.exit(-1);
         }
-
     }
 
     public SCFile getmFile()
