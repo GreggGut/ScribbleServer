@@ -30,6 +30,18 @@ public class ScribbleClients
         mClient.add(user);
     }
 
+    synchronized public boolean isUserLoggedin(User me)
+    {
+        for (User user : mClient)
+        {
+            if (user.getUsername().equals(me.getUsername()))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
     synchronized public void delClient(String cliAddr, int port)
     {
         User c;
@@ -97,7 +109,6 @@ public class ScribbleClients
 
             if (file.isFile())
             {
-                //try
                 {
                     //TOCONF This is only for PDF documents.... will we have any other type of documents?
                     String fileName = file.getName();
@@ -117,8 +128,7 @@ public class ScribbleClients
                         }
                         catch (IOException ex)
                         {
-                            //Logger.getLogger(ScribbleClients.class.getName()).log(Level.SEVERE, null, ex);
-                            System.out.println("Failed opening the "+file.getName()+ " PDF, this file will be ignored");
+                            System.out.println("Failed opening the " + file.getName() + " PDF, this file will be ignored");
                         }
                     }
                 }
@@ -135,6 +145,7 @@ public class ScribbleClients
         /**
          * Creating a text file will all the files available to the user
          */
+        //TODO make sure that the string is not longer than what is allowed by current network implementation
         for (SCFile file : mFiles)
         {
             toBeSend += file.getName();

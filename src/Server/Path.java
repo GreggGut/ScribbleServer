@@ -33,11 +33,10 @@ public class Path
      * @param id The ID of the path
      * @param mode The mode of the path (true for write, false for erase)
      * @param color The color of the path
-     * @param active Is the path active (should be show it or not.. is it the most up to date path)
+     * @param width Is the width of the pen
+     * @param page The page on which this Path occurs
      */
-    Path(int id, boolean mode, int color, /*
-             * boolean active,
-             */ int width, int page)
+    Path(int id, boolean mode, int color, int width, int page)
     {
         this.id = id;
         this.mode = mode;

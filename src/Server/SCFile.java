@@ -1,6 +1,6 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+/**
+ *
+ * @author Grzegorz Gut <Gregg.Gut@gmail.com>
  */
 package Server;
 
@@ -19,10 +19,6 @@ import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-/**
- *
- * @author Grzegorz Gut <Gregg.Gut@gmail.com>
- */
 public class SCFile
 {
 
@@ -32,6 +28,9 @@ public class SCFile
     private ArrayList<User> mActiveUsers = new ArrayList<User>();
     private User presentOwner = null;
     private Writer out = null;
+    private static final String splitInfo = ",";
+    private static final String splitPoints = "$";
+    private static final String ENCODING = "UTF-8";
 
     /**
      * Default constructor
@@ -156,15 +155,18 @@ public class SCFile
         mActiveUsers.remove(removeUser);
     }
 
-    //TODO I need to design and implement this
-    //Best choice would be to store info into files in real time - As soon as it comes
+    /**
+     * This function saves the newly received path into a file
+     *
+     * @param path The path to be saved (includes undo, redo, and clearAll)
+     */
     synchronized public void saveFileContent(Path path)
     {
-
         try
         {
-            String toSave = getPathInfo(path);
+            String toSave = pathToString(path);
             out.write(toSave);
+            //Flushing is used so that the content is written to the file right away
             out.flush();
         }
         catch (IOException ex)
@@ -173,45 +175,37 @@ public class SCFile
         }
     }
 
-    //TOCONF does this really work?
-//    @Override
-//    protected void finalize()
-//    {
-//        System.out.println("In finalize");
-//        try
-//        {
-//            out.close();
-//        }
-//        catch (IOException ex)
-//        {
-//            Logger.getLogger(SCFile.class.getName()).log(Level.SEVERE, null, ex);
-//        }
-//    }
-    private String getPathInfo(Path path)
+    /**
+     * This function converts a path , including undo, redo, and clear all, into strings
+     *
+     * @param path A path object (includes undo, redo, and clearAll)
+     * @return String representing a path
+     */
+    private String pathToString(Path path)
     {
         String toSave = String.valueOf(path.getPage());
-        toSave += ",";
+        toSave += splitInfo;
         int type = path.getType();
         toSave += type;
-        toSave += ",";
+        toSave += splitInfo;
         if (type == Path.PATH)
         {
             toSave += path.getId();
-            toSave += ",";
+            toSave += splitInfo;
             toSave += path.getMode();
-            toSave += ",";
+            toSave += splitInfo;
             toSave += path.getColor();
-            toSave += ",";
+            toSave += splitInfo;
             toSave += path.getWidth();
-            toSave += ",";
+            toSave += splitInfo;
 
             //Get all the parameters of the file
             for (Point point : path.getmPoints())
             {
                 toSave += point.x();
-                toSave += "-";
+                toSave += splitPoints;
                 toSave += point.y();
-                toSave += "-";
+                toSave += splitPoints;
             }
             //toSave = toSave.substring(0, toSave.length() - 2);
         }
@@ -220,15 +214,19 @@ public class SCFile
         return toSave;
     }
 
+    /**
+     * This function restores the content of this CSFile from a .scf file
+     */
     private void loadFileContent()
     {
         Reader in = null;
         BufferedReader mBuffer = null;
+        String savedName = null;
         try
         {
-            String savedName = name.substring(0, name.length() - 4).concat(".scf");
+            savedName = name.substring(0, name.length() - 4).concat(".scf");
             System.out.println(savedName);
-            in = new InputStreamReader(new FileInputStream("documents//" + savedName), "UTF-8");
+            in = new InputStreamReader(new FileInputStream("documents//" + savedName), ENCODING);
             mBuffer = new BufferedReader(in);
             String line;
             while ((line = mBuffer.readLine()) != null)
@@ -238,15 +236,15 @@ public class SCFile
         }
         catch (FileNotFoundException ex)
         {
-            Logger.getLogger(SCFile.class.getName()).log(Level.SEVERE, null, ex);
+            System.out.println(savedName + " file not found. The content will not be restored");
         }
         catch (UnsupportedEncodingException ex)
         {
-            Logger.getLogger(SCFile.class.getName()).log(Level.SEVERE, null, ex);
+            System.out.println(ENCODING + " encoding is unsupported and " + savedName + " will not be restored");
         }
         catch (IOException ex)
         {
-            Logger.getLogger(SCFile.class.getName()).log(Level.SEVERE, null, ex);
+            System.out.println("An I/O exception occured during file recovery. " + savedName + " will not be resoted");
         }
         finally
         {
@@ -257,20 +255,27 @@ public class SCFile
             }
             catch (IOException ex)
             {
-                Logger.getLogger(SCFile.class.getName()).log(Level.SEVERE, null, ex);
+                System.out.println("An I/O exception occured while closing " + savedName + " file.");
             }
             catch (NullPointerException x)
             {
+                System.out.println("An Null pointer exception occured while closing " + savedName + " buffer.");
             }
         }
     }
 
+    /**
+     * This function converts a file line content into a path, undo, redo, or clear all. It is only called at server startup
+     *
+     * @param line
+     */
     private void decodeLine(String line)
     {
-        String[] parts = line.split(",");
+        String[] parts = line.split(splitInfo);
         int page = Integer.parseInt(parts[0]);
         short type = Short.parseShort(parts[1]);
         Path newPath;
+        //If real path gather all the points
         if (type == Path.PATH)
         {
             int pathID = Integer.parseInt(parts[2]);
@@ -278,8 +283,8 @@ public class SCFile
             int color = Integer.parseInt(parts[4]);
             int width = Integer.parseInt(parts[5]);
 
-
-            String[] allPoints = parts[6].split("-");
+            //Splitting the x,y coordinates and recreating the points
+            String[] allPoints = parts[6].split(splitPoints);
             newPath = new Path(width, mode, color, width, page);
             for (int i = 0; i < allPoints.length;)
             {
@@ -289,11 +294,12 @@ public class SCFile
                 newPath.AddPoint(newPoint);
             }
         }
+        //otherwise just the type (Undo, Redo, ClearAll) and page
         else
         {
             newPath = new Path(type, page);
         }
-        getPages().get(page).restorePath(newPath);
 
+        getPages().get(page).restorePath(newPath);
     }
 }

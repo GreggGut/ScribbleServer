@@ -11,8 +11,6 @@ import java.util.Iterator;
 public class Page
 {
 
-    //private int pageNumber;
-    //private SCFile mParentFile;
     private Collection<Path> mPaths = new ArrayList<Path>();
     private SCFile mFile;
 

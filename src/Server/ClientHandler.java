@@ -81,13 +81,7 @@ public class ClientHandler extends Thread
      *
      * @param line
      */
-    private void decodeRequest(String line)//, PrintWriter out)
-    /*
-     * The input line (client message) can be :
-     * who	-- a list of users is returned
-     * or	any text	-- which is broadcast with
-     * (cliAddr,port) at its front
-     */
+    private void decodeRequest(String line)
     {
         //Remove all spaces
         String decodeLine = line.trim();
@@ -164,7 +158,7 @@ public class ClientHandler extends Thread
                      * Download file This does not do the actual download, just sets the user working file
                      */
                     case NetworkProtocol.DOWNLOAD_FILE:
-                        downloadFile(info);
+                        setDownloadedFile(info);
                         break;
 
                     /**
@@ -257,13 +251,24 @@ public class ClientHandler extends Thread
                 String cr[] = lineFromFile.split(",");
                 if (cr.length == 2 && cr[0].equals(username) && cr[1].equals(password))
                 {
-                    System.out.println("Login fine");
-                    loginFine = true;
-                    me.setUsername(username);
-                    mClients.addClient(me);
-                    break;
+                    if (!mClients.isUserLoggedin(me))
+                    {
+                        System.out.println("Login fine");
+                        loginFine = true;
+                        me.setUsername(username);
+                        mClients.addClient(me);
+                        break;
+                    }
+                    else
+                    {
+                        //Failed to login since user already logged in
+                        break;
+                    }
+
                 }
             }
+
+            //Sending login result
             String toSend = NetworkProtocol.split;
             toSend += NetworkProtocol.LOGIN;
             toSend += NetworkProtocol.split;
@@ -345,11 +350,11 @@ public class ClientHandler extends Thread
     }
 
     /**
-     * This function doesn't do the actual download, it just sets the user file
+     * This function sets the file the user downloaded as active file
      *
      * @param info
      */
-    private void downloadFile(String[] info)
+    private void setDownloadedFile(String[] info)
     {
         ArrayList<SCFile> allFiles = mClients.getFiles();
 
@@ -370,8 +375,6 @@ public class ClientHandler extends Thread
      */
     private void newPath(String[] info, String line)
     {
-        //System.out.println("New path");
-
         try
         {
             /**
@@ -391,9 +394,7 @@ public class ClientHandler extends Thread
             int page = Integer.parseInt(info[5]);
             int width = Integer.parseInt(info[6]);
 
-            Path path = new Path(pathID, mode, color/*
-                     * , active
-                     */, width, page);
+            Path path = new Path(pathID, mode, color, width, page);
 
             me.setWorkingPath(path);
 
