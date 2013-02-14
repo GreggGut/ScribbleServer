@@ -19,6 +19,7 @@ public class ClientHandler extends Thread
     private ScribbleClients mClients;
     private User me;
     private boolean logoutRequest = false;
+    private boolean loggedIn = false;
 
     ClientHandler(Socket socket, ScribbleClients mClients)
     {
@@ -105,10 +106,14 @@ public class ClientHandler extends Thread
             catch (NumberFormatException e)
             {
                 /**
-                 * Cannot identify what was send - technically we should never
-                 * get here
+                 * Cannot identify what was send - theoretically we should never get here
                  */
                 System.out.println("Failed to identify the received message");
+                return;
+            }
+            //If not logged in, the user can only login, no other actions are acceptable
+            if (!loggedIn && choice != NetworkProtocol.LOGIN)
+            {
                 return;
             }
 
@@ -206,7 +211,6 @@ public class ClientHandler extends Thread
                      */
                     case NetworkProtocol.DELETE_PATH:
                         deletePath(info, line);
-
                         break;
 
                     case NetworkProtocol.CLEAR_ALL:
@@ -236,25 +240,24 @@ public class ClientHandler extends Thread
      */
     private void login(String[] info)
     {
-        System.out.println("Login, Not implemented");
         try
         {
             String username = info[2];
             String password = info[3];
 
             //TOCONF For now I am storing the username/password in a file. This would have to be implemented in a database.
-            BufferedReader buffer = new BufferedReader(new FileReader("resources/credential"));
+            BufferedReader buffer = new BufferedReader(new FileReader("resources//credential"));
             String lineFromFile;
-            boolean loginFine = false;
             while ((lineFromFile = buffer.readLine()) != null)
             {
                 String cr[] = lineFromFile.split(",");
                 if (cr.length == 2 && cr[0].equals(username) && cr[1].equals(password))
                 {
-                    if (!mClients.isUserLoggedin(me))
+                    //One login per username
+                    if (!mClients.isUserLoggedin(username))
                     {
                         System.out.println("Login fine");
-                        loginFine = true;
+                        loggedIn = true;
                         me.setUsername(username);
                         mClients.addClient(me);
                         break;
@@ -272,7 +275,7 @@ public class ClientHandler extends Thread
             String toSend = NetworkProtocol.split;
             toSend += NetworkProtocol.LOGIN;
             toSend += NetworkProtocol.split;
-            if (loginFine)
+            if (loggedIn)
             {
                 toSend += "1";
             }
@@ -343,10 +346,37 @@ public class ClientHandler extends Thread
     {
         System.out.println("get file list");
 
-        String toSend = mClients.getListOfFiles();
-        toSend = encriptMessage(toSend);
+        String header = NetworkProtocol.split;
+        header += NetworkProtocol.GET_FILE_LIST;
+        header += NetworkProtocol.split;
 
-        me.sendMessage(toSend);
+        String toBeSend = header;
+        ArrayList<SCFile> files = mClients.getFiles();
+
+        for (SCFile file : files)
+        {
+            if (toBeSend.length() < 220)
+            {
+                toBeSend += file.getName();
+                toBeSend += NetworkProtocol.splitPoints;
+            }
+            else
+            {
+                toBeSend = toBeSend.substring(0, toBeSend.length() - 1);
+                toBeSend = encriptMessage(toBeSend);
+                me.sendMessage(toBeSend);
+
+                toBeSend = header;
+            }
+
+        }
+
+        if (!toBeSend.equals(header))
+        {
+            toBeSend = toBeSend.substring(0, toBeSend.length() - 1);
+            toBeSend = encriptMessage(toBeSend);
+            me.sendMessage(toBeSend);
+        }
     }
 
     /**
@@ -356,6 +386,10 @@ public class ClientHandler extends Thread
      */
     private void setDownloadedFile(String[] info)
     {
+        if (!loggedIn)
+        {
+            return;
+        }
         ArrayList<SCFile> allFiles = mClients.getFiles();
 
         for (SCFile f : allFiles)
@@ -498,8 +532,6 @@ public class ClientHandler extends Thread
 
             Path newPath = new Path(Path.REDO, page);
             me.getmFile().getPages().get(page).addPath(newPath);
-            //Remove the last item, the undo action from the list
-            //me.getmFile().getPages().get(page).getPaths().remove(me.getmFile().getPages().get(page).getPaths().size() - 1);
 
             mClients.broadcast(line, me, false);
         }
@@ -652,14 +684,6 @@ public class ClientHandler extends Thread
 
         mPath += path.getColor();
         mPath += NetworkProtocol.split;
-
-//        int active = 1;
-//        if (!path.isActive())
-//        {
-//            active = 0;
-//        }
-//        mPath += active;
-//        mPath += NetworkProtocol.split;
 
         mPath += path.getPage();
         mPath += NetworkProtocol.split;

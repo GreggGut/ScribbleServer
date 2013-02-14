@@ -22,7 +22,7 @@ public class ScribbleClients
 
     ScribbleClients()
     {
-        getAllFiles(mFiles);
+        getAllFiles();
     }
 
     synchronized public void addClient(User user)
@@ -30,11 +30,13 @@ public class ScribbleClients
         mClient.add(user);
     }
 
-    synchronized public boolean isUserLoggedin(User me)
+    synchronized public boolean isUserLoggedin(String username)
     {
+        System.out.println("In isUserLoggedin()");
         for (User user : mClient)
         {
-            if (user.getUsername().equals(me.getUsername()))
+            System.out.println(user.getUsername() + " " + username);
+            if (user.getUsername().equals(username))
             {
                 return true;
             }
@@ -89,7 +91,7 @@ public class ScribbleClients
      *
      * @param mFiles Vector of SCFile that will be filled with the files available to all users
      */
-    private void getAllFiles(ArrayList<SCFile> mFiles)
+    private void getAllFiles()
     {
         /**
          * The folder where all the files are present, as seen from this application
@@ -134,27 +136,6 @@ public class ScribbleClients
                 }
             }
         }
-    }
-
-    synchronized public String getListOfFiles()
-    {
-        String toBeSend = NetworkProtocol.split;
-        toBeSend += NetworkProtocol.GET_FILE_LIST;
-        toBeSend += NetworkProtocol.split;
-
-        /**
-         * Creating a text file will all the files available to the user
-         */
-        //TODO make sure that the string is not longer than what is allowed by current network implementation
-        for (SCFile file : mFiles)
-        {
-            toBeSend += file.getName();
-            toBeSend += NetworkProtocol.splitPoints;
-        }
-
-        toBeSend = toBeSend.substring(0, toBeSend.length() - 1);
-
-        return toBeSend;
     }
 
     synchronized public ArrayList<SCFile> getFiles()

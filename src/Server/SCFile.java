@@ -29,7 +29,7 @@ public class SCFile
     private User presentOwner = null;
     private Writer out = null;
     private static final String splitInfo = ",";
-    private static final String splitPoints = "$";
+    private static final String splitPoints = ";";
     private static final String ENCODING = "UTF-8";
 
     /**
@@ -275,31 +275,38 @@ public class SCFile
         int page = Integer.parseInt(parts[0]);
         short type = Short.parseShort(parts[1]);
         Path newPath;
-        //If real path gather all the points
-        if (type == Path.PATH)
+        try
         {
-            int pathID = Integer.parseInt(parts[2]);
-            boolean mode = Boolean.parseBoolean(parts[3]);
-            int color = Integer.parseInt(parts[4]);
-            int width = Integer.parseInt(parts[5]);
-
-            //Splitting the x,y coordinates and recreating the points
-            String[] allPoints = parts[6].split(splitPoints);
-            newPath = new Path(width, mode, color, width, page);
-            for (int i = 0; i < allPoints.length;)
+            //If real path gather all the points
+            if (type == Path.PATH)
             {
-                int x = Integer.parseInt(allPoints[i++]);
-                int y = Integer.parseInt(allPoints[i++]);
-                Point newPoint = new Point(x, y);
-                newPath.AddPoint(newPoint);
-            }
-        }
-        //otherwise just the type (Undo, Redo, ClearAll) and page
-        else
-        {
-            newPath = new Path(type, page);
-        }
+                int pathID = Integer.parseInt(parts[2]);
+                boolean mode = Boolean.parseBoolean(parts[3]);
+                int color = Integer.parseInt(parts[4]);
+                int width = Integer.parseInt(parts[5]);
 
-        getPages().get(page).restorePath(newPath);
+                //Splitting the x,y coordinates and recreating the points
+                String[] allPoints = parts[6].split(splitPoints);
+                newPath = new Path(width, mode, color, width, page);
+                for (int i = 0; i < allPoints.length;)
+                {
+                    int x = Integer.parseInt(allPoints[i++]);
+                    int y = Integer.parseInt(allPoints[i++]);
+                    Point newPoint = new Point(x, y);
+                    newPath.AddPoint(newPoint);
+                }
+            }
+            //otherwise just the type (Undo, Redo, ClearAll) and page
+            else
+            {
+                newPath = new Path(type, page);
+            }
+
+            getPages().get(page).restorePath(newPath);
+        }
+        catch (NumberFormatException x)
+        {
+            System.out.println("NumberFormatException");
+        }
     }
 }
