@@ -5,6 +5,10 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.apache.pdfbox.exceptions.COSVisitorException;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.common.PDRectangle;
 
 /**
  *
@@ -29,6 +33,7 @@ public class ClientHandler extends Thread
         this.mClients = mClients;
 
         System.out.println("Client connection from (" + cliAddr + ", " + port + ")");
+        //createNewDocument(null);
     }
 
     @Override
@@ -220,6 +225,9 @@ public class ClientHandler extends Thread
 
                     case NetworkProtocol.UPDATE_FILE:
                         updateUserwithFileContent();
+                        break;
+                    case NetworkProtocol.CREATE_NEW_DOCUMENT:
+                        createNewDocument(info);
                         break;
                     default:
                         System.out.println("Should NOT be here....");
@@ -623,6 +631,8 @@ public class ClientHandler extends Thread
                 {
                     String toSend = NetworkProtocol.split;
                     toSend += NetworkProtocol.UNDO;
+                    toSend += NetworkProtocol.split;
+                    toSend += path.getPage();
                     toSend = encriptMessage(toSend);
                     me.sendMessage(toSend);
                 }
@@ -630,6 +640,8 @@ public class ClientHandler extends Thread
                 {
                     String toSend = NetworkProtocol.split;
                     toSend += NetworkProtocol.REDO;
+                    toSend += NetworkProtocol.split;
+                    toSend += path.getPage();
                     toSend = encriptMessage(toSend);
                     me.sendMessage(toSend);
                 }
@@ -637,6 +649,8 @@ public class ClientHandler extends Thread
                 {
                     String toSend = NetworkProtocol.split;
                     toSend += NetworkProtocol.CLEAR_ALL;
+                    toSend += NetworkProtocol.split;
+                    toSend += path.getPage();
                     toSend = encriptMessage(toSend);
                     me.sendMessage(toSend);
                 }
@@ -730,5 +744,61 @@ public class ClientHandler extends Thread
         endpath += NetworkProtocol.END_PATH;
         endpath = encriptMessage(endpath);
         me.sendMessage(endpath);
+    }
+
+    private void createNewDocument(String[] info)
+    {
+        String fileName = info[2];
+        int page = Integer.parseInt(info[3]);
+
+        String toSend = NetworkProtocol.split;
+        toSend += String.valueOf(NetworkProtocol.CREATE_NEW_DOCUMENT);
+        toSend += NetworkProtocol.split;
+
+        if (mClients.doFileExists(fileName))
+        {
+            System.out.println("File " + fileName + " already exists and will not be recreated!");
+            toSend += String.valueOf(NetworkProtocol.FILE_EXISTS);
+
+            toSend = encriptMessage(toSend);
+            me.sendMessage(toSend);
+        }
+        else
+        {
+            try
+            {
+
+                PDDocument doc = new PDDocument();
+                for (int i = 0; i < page; i++)
+                {
+                    PDPage p = new PDPage();
+                    p.setMediaBox(PDPage.PAGE_SIZE_A4);
+                    doc.addPage(p);
+                }
+                doc.save(SCFile.folder + fileName);
+                doc.close();
+                mClients.addFile(fileName);
+
+                toSend += String.valueOf(NetworkProtocol.FILE_WAS_CREATED);
+                toSend += NetworkProtocol.split;
+                toSend += fileName;
+            }
+            catch (IOException x)
+            {
+                toSend += String.valueOf(NetworkProtocol.FILE_CREATION_FAILED);
+                System.out.println("IOException while creating new PDF file");
+            }
+            catch (COSVisitorException x)
+            {
+                toSend += String.valueOf(NetworkProtocol.FILE_CREATION_FAILED);
+                System.out.println("COSVisitorException while creating new PDF file");
+            }
+            finally
+            {
+                System.out.println("in finally");
+                toSend = encriptMessage(toSend);
+                me.sendMessage(toSend);
+            }
+        }
     }
 }

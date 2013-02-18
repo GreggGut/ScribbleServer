@@ -33,6 +33,11 @@ public class NetworkProtocol
     public static final int CLEAR_ALL = 12;
     public static final int UPDATE_FILE=13;
     public static final int DOWNLOAD_FILE_DONE=14;
+    public static final int CREATE_NEW_DOCUMENT=15;
+
+    public static final int FILE_WAS_CREATED=1;
+    public static final int FILE_EXISTS=2;
+    public static final int FILE_CREATION_FAILED=3;
     /**
      * User to split the info received from the clients
      */

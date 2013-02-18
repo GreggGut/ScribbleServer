@@ -44,6 +44,7 @@ public class ScribbleClients
         return false;
     }
 
+    //TOCONF this didn't work on the school computer for some reason , need to be fixed/investigated!
     synchronized public void delClient(String cliAddr, int port)
     {
         User c;
@@ -96,9 +97,7 @@ public class ScribbleClients
         /**
          * The folder where all the files are present, as seen from this application
          */
-        String path = "documents";
-
-        File folder = new File(path);
+        File folder = new File(SCFile.folder);
         File[] listOfFiles = folder.listFiles();
 
         /**
@@ -120,9 +119,8 @@ public class ScribbleClients
                         try
                         {
                             PDDocument doc = PDDocument.load(file);
-                            int count = doc.getNumberOfPages();
+                            int nPages = doc.getNumberOfPages();
                             doc.close();
-                            int nPages = count;
                             SCFile newFile = new SCFile(file.getName(), file.getPath(), nPages);
 
                             mFiles.add(newFile);
@@ -138,8 +136,41 @@ public class ScribbleClients
         }
     }
 
+    public void addFile(String fileName)
+    {
+        File file = new File(SCFile.folder + "//" + fileName);
+        if (file.isFile())
+        {
+            try
+            {
+                PDDocument doc = PDDocument.load(file);
+                int nPages = doc.getNumberOfPages();
+                doc.close();
+                SCFile newFile = new SCFile(file.getName(), file.getPath(), nPages);
+
+                mFiles.add(newFile);
+            }
+            catch (IOException ex)
+            {
+                System.out.println("Failed opening the " + file.getName() + ", File will not be added.");
+            }
+        }
+    }
+
     synchronized public ArrayList<SCFile> getFiles()
     {
         return mFiles;
+    }
+
+    synchronized public boolean doFileExists(String fileName)
+    {
+        for (SCFile file : mFiles)
+        {
+            if (file.getName().equals(fileName))
+            {
+                return true;
+            }
+        }
+        return false;
     }
 }

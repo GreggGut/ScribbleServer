@@ -31,6 +31,7 @@ public class SCFile
     private static final String splitInfo = ",";
     private static final String splitPoints = ";";
     private static final String ENCODING = "UTF-8";
+    public static final String folder = "documents//";
 
     /**
      * Default constructor
@@ -59,7 +60,7 @@ public class SCFile
         {
             String savedName = name.substring(0, name.length() - 4).concat(".scf");
             System.out.println(savedName);
-            out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream("documents/" + savedName, true), "UTF-8"));
+            out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(folder + savedName, true), "UTF-8"));
         }
         catch (UnsupportedEncodingException ex)
         {
@@ -226,7 +227,7 @@ public class SCFile
         {
             savedName = name.substring(0, name.length() - 4).concat(".scf");
             System.out.println(savedName);
-            in = new InputStreamReader(new FileInputStream("documents//" + savedName), ENCODING);
+            in = new InputStreamReader(new FileInputStream(folder + savedName), ENCODING);
             mBuffer = new BufferedReader(in);
             String line;
             while ((line = mBuffer.readLine()) != null)
