@@ -86,11 +86,6 @@ public class SCFile
         return name;
     }
 
-    //TOCONF this might be a better way of coding. Add path to file, and the file determines where to place it (on which page)
-//    public void addPath(int page, Path path)
-//    {
-//        mPages.get(page).addPath(path);
-//    }
     /**
      * Get the file location on the server
      *
@@ -303,7 +298,7 @@ public class SCFile
                 newPath = new Path(type, page);
             }
 
-            getPages().get(page).restorePath(newPath);
+            mPages.get(page).restorePath(newPath);
         }
         catch (NumberFormatException x)
         {

@@ -212,7 +212,8 @@ public class ClientHandler extends Thread
                     /**
                      * delete path Delete - page - pathID
                      *
-                     * TOCONFIRM How will we implement the delete function?
+                     * TOCONFIRM How will we implement the delete function? For now we just use white color as eraser so this function is
+                     * not needed, Keeping it here for future development
                      */
                     case NetworkProtocol.DELETE_PATH:
                         deletePath(info, line);
@@ -499,12 +500,6 @@ public class ClientHandler extends Thread
     private void undo(String[] info, String line)
     {
         System.out.println("undo");
-
-        /**
-         * TOCONF how will me implement this??? For now I will completely delete
-         * this from the paths and on redo we will resend the whole path, all of
-         * it points, and end of path
-         */
         try
         {
             int page = Integer.parseInt(info[2]);
