@@ -111,7 +111,8 @@ public class ClientHandler extends Thread
             catch (NumberFormatException e)
             {
                 /**
-                 * Cannot identify what was send - theoretically we should never get here
+                 * Cannot identify what was send - theoretically we should never
+                 * get here
                  */
                 System.out.println("Failed to identify the received message");
                 return;
@@ -127,7 +128,8 @@ public class ClientHandler extends Thread
                 switch (choice)
                 {
                     /**
-                     * Login Info will contain the following login - password - port
+                     * Login Info will contain the following login - password -
+                     * port
                      */
                     case NetworkProtocol.LOGIN:
                         login(info);
@@ -165,7 +167,8 @@ public class ClientHandler extends Thread
                         break;
 
                     /**
-                     * Download file This does not do the actual download, just sets the user working file
+                     * Download file This does not do the actual download, just
+                     * sets the user working file
                      */
                     case NetworkProtocol.DOWNLOAD_FILE:
                         setDownloadedFile(info);
@@ -212,7 +215,8 @@ public class ClientHandler extends Thread
                     /**
                      * delete path Delete - page - pathID
                      *
-                     * TOCONFIRM How will we implement the delete function? For now we just use white color as eraser so this function is
+                     * TOCONFIRM How will we implement the delete function? For
+                     * now we just use white color as eraser so this function is
                      * not needed, Keeping it here for future development
                      */
                     case NetworkProtocol.DELETE_PATH:
@@ -340,7 +344,7 @@ public class ClientHandler extends Thread
     {
         System.out.println("Release Ownership");
 
-        if (me.getmFile().getPresentOwner().equals(me))
+        if (me.getmFile() != null && me.getmFile().getPresentOwner().equals(me))
         {
             me.getmFile().setPresentOwner(null);
             mClients.broadcast(line, me, true);

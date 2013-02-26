@@ -17,7 +17,7 @@ import java.net.UnknownHostException;
 
 /**
  *
- *  @author Grzegorz Gut <Gregg.Gut@gmail.com>
+ * @author Grzegorz Gut <Gregg.Gut@gmail.com>
  */
 public class User
 {
@@ -42,6 +42,15 @@ public class User
     // the address and port of a client are used to uniquely identify it
     {
         if (clientAdd.equals(ca) && (port == p))
+        {
+            return true;
+        }
+        return false;
+    }
+
+    public boolean matchesUser(String user)
+    {
+        if (user.equals(username))
         {
             return true;
         }
@@ -136,8 +145,12 @@ public class User
             this.mFile.removeUser(this);
         }
         //Set new file
-        this.mFile = mFile;
-        mFile.addActiveUsers(this);
+        
+        if (mFile != null)
+        {
+            this.mFile = mFile;
+            mFile.addActiveUsers(this);
+        }
     }
 
     public Path getWorkingPath()
@@ -157,6 +170,6 @@ public class User
 
     public void setUsername(String username)
     {
-        this.username=username;
+        this.username = username;
     }
 }

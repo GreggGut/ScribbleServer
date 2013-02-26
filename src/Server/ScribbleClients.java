@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import org.apache.pdfbox.pdmodel.PDDocument;
 
 /**
@@ -47,21 +48,72 @@ public class ScribbleClients
     //TOCONF this didn't work on the school computer for some reason , need to be fixed/investigated!
     synchronized public void delClient(String cliAddr, int port)
     {
-        User c;
-        for (int i = 0; i < mClient.size(); i++)
+        //User c;
+        Iterator<User> clientsIterator = mClient.iterator();
+        while (clientsIterator.hasNext())
         {
-            c = mClient.get(i);
-            if (c.matches(cliAddr, port))
+            User u = clientsIterator.next();
+            if (u.matches(cliAddr, port))
             {
-                mClient.remove(i);
+                if (u.getmFile() != null)
+                {
+                    if (u.getmFile().getPresentOwner() != null)
+                    {
+                        if (u.getmFile().getPresentOwner().equals(u))
+                        {
+                            u.getmFile().setPresentOwner(null);
+                            String toSend = NetworkProtocol.split;
+                            toSend += NetworkProtocol.RELEASE_OWNERSHIP;
+                            toSend = encriptMessage(toSend);
+                            broadcast(toSend, u, true);
+                        }
+                    }
+                    u.getmFile().removeUser(u);
+                }
+                clientsIterator.remove();
                 System.out.println("User " + cliAddr + " " + port + " logout");
                 break;
             }
         }
+//        for (int i = 0; i < mClient.size(); i++)
+//        {
+//            c = mClient.get(i);
+//            if (c.matchesUser(c.getUsername()))//                c.matches(cliAddr, port))
+//            {
+//                if (c.getmFile() != null)
+//                {
+//                    if (c.getmFile().getPresentOwner() != null)
+//                    {
+//                        if (c.getmFile().getPresentOwner().equals(c))
+//                        {
+//                            c.getmFile().setPresentOwner(null);
+//                            String toSend = NetworkProtocol.split;
+//                            toSend += NetworkProtocol.RELEASE_OWNERSHIP;
+//                            toSend = encriptMessage(toSend);
+//                            broadcast(toSend, c, false);
+//                        }
+//                    }
+//
+//                    c.getmFile().removeUser(c);
+//                }
+//                //c.setmFile(null);
+//                mClient.remove(i);
+//                System.out.println("User " + cliAddr + " " + port + " logout");
+//                break;
+//            }
+//        }
+    }
+
+    private String encriptMessage(String toSend)
+    {
+        String header = String.format("%4d", toSend.length() + 1);
+        toSend = header + toSend;
+        return toSend;
     }
 
     /**
-     * Send message to all clients of the working file, excluding the user who send it (doNotSend)
+     * Send message to all clients of the working file, excluding the user who
+     * send it (doNotSend)
      *
      * @param msg
      * @param doNotSend
@@ -90,12 +142,14 @@ public class ScribbleClients
     /**
      * Function that finds all the files in a directory
      *
-     * @param mFiles Vector of SCFile that will be filled with the files available to all users
+     * @param mFiles Vector of SCFile that will be filled with the files
+     * available to all users
      */
     private void getAllFiles()
     {
         /**
-         * The folder where all the files are present, as seen from this application
+         * The folder where all the files are present, as seen from this
+         * application
          */
         File folder = new File(SCFile.folder);
         File[] listOfFiles = folder.listFiles();
