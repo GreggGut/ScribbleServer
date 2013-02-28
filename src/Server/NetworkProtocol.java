@@ -12,10 +12,6 @@ public class NetworkProtocol
 {
 
     /**
-     * Port of the server
-     */
-    //public static final int SERVERPORT = 21223;// 54555;
-    /**
      * Network protocol from Client to Server
      */
     public static final int LOGIN = 0;
@@ -31,13 +27,17 @@ public class NetworkProtocol
     public static final int REDO = 10;
     public static final int DELETE_PATH = 11;
     public static final int CLEAR_ALL = 12;
-    public static final int UPDATE_FILE=13;
-    public static final int DOWNLOAD_FILE_DONE=14;
-    public static final int CREATE_NEW_DOCUMENT=15;
-
-    public static final int FILE_WAS_CREATED=1;
-    public static final int FILE_EXISTS=2;
-    public static final int FILE_CREATION_FAILED=3;
+    public static final int UPDATE_FILE = 13;
+    public static final int DOWNLOAD_FILE_DONE = 14;
+    public static final int CREATE_NEW_DOCUMENT = 15;
+    public static final int GET_FILE_LIST_CLEAR = 16;
+    public static final int GET_FILE_LIST_COMPLETED = 17;
+    /**
+     * Used for File Creation
+     */
+    public static final int FILE_WAS_CREATED = 1;
+    public static final int FILE_EXISTS = 2;
+    public static final int FILE_CREATION_FAILED = 3;
     /**
      * User to split the info received from the clients
      */

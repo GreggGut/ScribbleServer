@@ -9,7 +9,6 @@ import java.util.logging.Logger;
 import org.apache.pdfbox.exceptions.COSVisitorException;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
-import org.apache.pdfbox.pdmodel.common.PDRectangle;
 
 /**
  *
@@ -360,37 +359,35 @@ public class ClientHandler extends Thread
     {
         System.out.println("get file list");
 
+        //Clearing the user file list
+        //TOCONF Do we need to send this here?
+        String clear = NetworkProtocol.split;
+        clear += NetworkProtocol.GET_FILE_LIST_CLEAR;
+        //clear += NetworkProtocol.split;
+
+        clear = encriptMessage(clear);
+        me.sendMessage(clear);
+
+        //Creating general header for sending files
         String header = NetworkProtocol.split;
         header += NetworkProtocol.GET_FILE_LIST;
         header += NetworkProtocol.split;
 
-        String toBeSend = header;
         Vector<SCFile> files = mClients.getFiles();
 
-        for (SCFile file : files)
+        for (SCFile file : mClients.getFiles())
         {
-            if (toBeSend.length() < 220)
-            {
-                toBeSend += file.getName();
-                toBeSend += NetworkProtocol.splitPoints;
-            }
-            else
-            {
-                toBeSend = toBeSend.substring(0, toBeSend.length() - 1);
-                toBeSend = encriptMessage(toBeSend);
-                me.sendMessage(toBeSend);
-
-                toBeSend = header;
-            }
-
-        }
-
-        if (!toBeSend.equals(header))
-        {
-            toBeSend = toBeSend.substring(0, toBeSend.length() - 1);
+            String toBeSend = header;
+            toBeSend += file.getName();
             toBeSend = encriptMessage(toBeSend);
             me.sendMessage(toBeSend);
         }
+
+        String end = NetworkProtocol.split;
+        end += NetworkProtocol.GET_FILE_LIST_COMPLETED;
+
+        end = encriptMessage(end);
+        me.sendMessage(end);
     }
 
     /**
@@ -554,29 +551,31 @@ public class ClientHandler extends Thread
     /**
      *
      * @param info Delete - page - pathID
+     *
+     * TODO Delete path is implemented using white color for now
      */
     private void deletePath(String[] info, String line)
     {
-        System.out.println("Delete path");
+        System.out.println("Delete path, Should never be here");
 
-        try
-        {
-            /**
-             * Parsing all the received info
-             */
-            int page = Integer.parseInt(info[2]);
-            int pathID = Integer.parseInt(info[3]);
-
-            me.getmFile().getPages().get(page).deletePath(pathID);
-
-            mClients.broadcast(line, me, false);
-        }
-        catch (NumberFormatException x)
-        {
-            /**
-             * Failed parsing, this request will be ignored
-             */
-        }
+//        try
+//        {
+//            /**
+//             * Parsing all the received info
+//             */
+//            int page = Integer.parseInt(info[2]);
+//            int pathID = Integer.parseInt(info[3]);
+//
+//            me.getmFile().getPages().get(page).deletePath(pathID);
+//
+//            mClients.broadcast(line, me, false);
+//        }
+//        catch (NumberFormatException x)
+//        {
+//            /**
+//             * Failed parsing, this request will be ignored
+//             */
+//        }
     }
 
     private void clearAll(String[] info, String line)
@@ -767,7 +766,6 @@ public class ClientHandler extends Thread
         {
             try
             {
-
                 PDDocument doc = new PDDocument();
                 for (int i = 0; i < page; i++)
                 {
@@ -782,6 +780,13 @@ public class ClientHandler extends Thread
                 toSend += String.valueOf(NetworkProtocol.FILE_WAS_CREATED);
                 toSend += NetworkProtocol.split;
                 toSend += fileName;
+
+                String newFile = NetworkProtocol.split;
+                newFile += NetworkProtocol.GET_FILE_LIST;
+                newFile += NetworkProtocol.split;
+                newFile+=fileName;
+                newFile = encriptMessage(newFile);
+                mClients.broadcast(newFile, me, true);
             }
             catch (IOException x)
             {

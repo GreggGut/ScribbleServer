@@ -2,7 +2,6 @@ package Server;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 
 /**
  *
@@ -51,19 +50,6 @@ public class Page
     public Collection<Path> getPaths()
     {
         return mPaths;
-    }
-
-    public void deletePath(int pathID)
-    {
-        Iterator<Path> pathIterator = mPaths.iterator();
-        while (pathIterator.hasNext())
-        {
-            if (pathIterator.next().getId() == pathID)
-            {
-                pathIterator.remove();
-                break;
-            }
-        }
     }
 
     public void clearPage()
