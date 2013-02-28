@@ -23,6 +23,8 @@ public class ScribbleServer
     {
         mClients = new ScribbleClients();
         new FileDownloader(mClients).start();
+        new Console(mClients).start();
+
         try
         {
             ServerSocket serverSock = new ServerSocket(PORT);

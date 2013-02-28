@@ -144,8 +144,8 @@ public class User
         {
             this.mFile.removeUser(this);
         }
+
         //Set new file
-        
         if (mFile != null)
         {
             this.mFile = mFile;
@@ -171,5 +171,15 @@ public class User
     public void setUsername(String username)
     {
         this.username = username;
+    }
+
+    public String getClientAdd()
+    {
+        return clientAdd;
+    }
+
+    public int getPort()
+    {
+        return port;
     }
 }

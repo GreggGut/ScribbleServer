@@ -3,6 +3,7 @@ package Server;
 import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.pdfbox.exceptions.COSVisitorException;
@@ -364,7 +365,7 @@ public class ClientHandler extends Thread
         header += NetworkProtocol.split;
 
         String toBeSend = header;
-        ArrayList<SCFile> files = mClients.getFiles();
+        Vector<SCFile> files = mClients.getFiles();
 
         for (SCFile file : files)
         {
@@ -403,7 +404,7 @@ public class ClientHandler extends Thread
         {
             return;
         }
-        ArrayList<SCFile> allFiles = mClients.getFiles();
+        Vector<SCFile> allFiles = mClients.getFiles();
 
         for (SCFile f : allFiles)
         {

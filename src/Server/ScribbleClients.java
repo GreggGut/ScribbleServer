@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.Vector;
+import java.util.concurrent.Semaphore;
 import org.apache.pdfbox.pdmodel.PDDocument;
 
 /**
@@ -19,7 +21,9 @@ public class ScribbleClients
 {
 
     private ArrayList<User> mClient = new ArrayList<User>();
-    private ArrayList<SCFile> mFiles = new ArrayList<SCFile>();
+    private Vector<SCFile> mFiles = new Vector<SCFile>();
+    //TODO use semaphores for all shared objects
+    private final Semaphore clientsSemaphore = new Semaphore(1);
 
     ScribbleClients()
     {
@@ -28,19 +32,39 @@ public class ScribbleClients
 
     synchronized public void addClient(User user)
     {
-        mClient.add(user);
+        try
+        {
+            clientsSemaphore.acquire();
+            mClient.add(user);
+            clientsSemaphore.release();
+        }
+        catch (InterruptedException e)
+        {
+            System.out.println("InterruptedException in ScribbleClients addClient()");
+        }
+
     }
 
     synchronized public boolean isUserLoggedin(String username)
     {
         System.out.println("In isUserLoggedin()");
-        for (User user : mClient)
+        try
         {
-            System.out.println(user.getUsername() + " " + username);
-            if (user.getUsername().equals(username))
+            clientsSemaphore.acquire();
+            for (User user : mClient)
             {
-                return true;
+                System.out.println(user.getUsername() + " " + username);
+                if (user.getUsername().equals(username))
+                {
+                    clientsSemaphore.release();
+                    return true;
+                }
             }
+            clientsSemaphore.release();
+        }
+        catch (InterruptedException e)
+        {
+            System.out.println("InterruptedException in ScribbleClients isUserLoggedin()");
         }
         return false;
     }
@@ -48,60 +72,42 @@ public class ScribbleClients
     //TOCONF this didn't work on the school computer for some reason , need to be fixed/investigated!
     synchronized public void delClient(String cliAddr, int port)
     {
-        //User c;
-        Iterator<User> clientsIterator = mClient.iterator();
-        while (clientsIterator.hasNext())
+
+        try
         {
-            User u = clientsIterator.next();
-            if (u.matches(cliAddr, port))
+            clientsSemaphore.acquire();
+            Iterator<User> clientsIterator = mClient.iterator();
+            while (clientsIterator.hasNext())
             {
-                if (u.getmFile() != null)
+                User u = clientsIterator.next();
+                if (u.matches(cliAddr, port))
                 {
-                    if (u.getmFile().getPresentOwner() != null)
+                    if (u.getmFile() != null)
                     {
-                        if (u.getmFile().getPresentOwner().equals(u))
+                        if (u.getmFile().getPresentOwner() != null)
                         {
-                            u.getmFile().setPresentOwner(null);
-                            String toSend = NetworkProtocol.split;
-                            toSend += NetworkProtocol.RELEASE_OWNERSHIP;
-                            toSend = encriptMessage(toSend);
-                            broadcast(toSend, u, true);
+                            if (u.getmFile().getPresentOwner().equals(u))
+                            {
+                                u.getmFile().setPresentOwner(null);
+                                String toSend = NetworkProtocol.split;
+                                toSend += NetworkProtocol.RELEASE_OWNERSHIP;
+                                toSend = encriptMessage(toSend);
+                                broadcast(toSend, u, true);
+                            }
                         }
+                        u.getmFile().removeUser(u);
                     }
-                    u.getmFile().removeUser(u);
+                    clientsIterator.remove();
+                    System.out.println("User " + cliAddr + " " + port + " logout");
+                    break;
                 }
-                clientsIterator.remove();
-                System.out.println("User " + cliAddr + " " + port + " logout");
-                break;
             }
+            clientsSemaphore.release();
         }
-//        for (int i = 0; i < mClient.size(); i++)
-//        {
-//            c = mClient.get(i);
-//            if (c.matchesUser(c.getUsername()))//                c.matches(cliAddr, port))
-//            {
-//                if (c.getmFile() != null)
-//                {
-//                    if (c.getmFile().getPresentOwner() != null)
-//                    {
-//                        if (c.getmFile().getPresentOwner().equals(c))
-//                        {
-//                            c.getmFile().setPresentOwner(null);
-//                            String toSend = NetworkProtocol.split;
-//                            toSend += NetworkProtocol.RELEASE_OWNERSHIP;
-//                            toSend = encriptMessage(toSend);
-//                            broadcast(toSend, c, false);
-//                        }
-//                    }
-//
-//                    c.getmFile().removeUser(c);
-//                }
-//                //c.setmFile(null);
-//                mClient.remove(i);
-//                System.out.println("User " + cliAddr + " " + port + " logout");
-//                break;
-//            }
-//        }
+        catch (InterruptedException e)
+        {
+            System.out.println("InterruptedException in ScribbleClients delClient()");
+        }
     }
 
     private String encriptMessage(String toSend)
@@ -211,7 +217,7 @@ public class ScribbleClients
         }
     }
 
-    synchronized public ArrayList<SCFile> getFiles()
+    synchronized public Vector<SCFile> getFiles()
     {
         return mFiles;
     }
@@ -227,4 +233,44 @@ public class ScribbleClients
         }
         return false;
     }
+
+    public void printUsers()
+    {
+        try
+        {
+            clientsSemaphore.acquire();
+            if (mClient.isEmpty())
+            {
+                System.out.println("No users are logged in");
+            }
+            else
+            {
+                for (User user : mClient)
+                {
+                    System.out.println(user.getUsername() + " Address: " + user.getClientAdd() + " Port: " + user.getPort());
+                    if (user.getmFile() != null)
+                    {
+                        if (user.getmFile().getPresentOwner() != null && user.getmFile().getPresentOwner().equals(user))
+                        {
+                            System.out.println("\t" + user.getmFile().getName() + " current owner");
+                        }
+                        else
+                        {
+                            System.out.println("\t" + user.getmFile().getName());
+                        }
+                    }
+                }
+            }
+            clientsSemaphore.release();
+        }
+        catch (InterruptedException x)
+        {
+            System.out.println("InterruptedException in Scribbleclient printUsers()");
+        }
+    }
+//    TODO This should be removed and functions using mClients should be implemented in this class with semaphores
+//    public Vector<User> getClients()
+//    {
+//        return mClient;
+//    }
 }
