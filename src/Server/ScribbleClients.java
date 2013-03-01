@@ -21,7 +21,7 @@ public class ScribbleClients
 {
 
     private ArrayList<User> mClient = new ArrayList<User>();
-    private Vector<SCFile> mFiles = new Vector<SCFile>();
+    private ArrayList<SCFile> mFiles = new ArrayList<SCFile>();
     //TODO use semaphores for all shared objects
     private final Semaphore clientsSemaphore = new Semaphore(1);
 
@@ -217,7 +217,7 @@ public class ScribbleClients
         }
     }
 
-    synchronized public Vector<SCFile> getFiles()
+    synchronized public ArrayList<SCFile> getFiles()
     {
         return mFiles;
     }
