@@ -373,7 +373,7 @@ public class ClientHandler extends Thread
         header += NetworkProtocol.GET_FILE_LIST;
         header += NetworkProtocol.split;
 
-        Vector<SCFile> files = mClients.getFiles();
+        //Vector<SCFile> files = mClients.getFiles();
 
         for (SCFile file : mClients.getFiles())
         {
@@ -401,7 +401,7 @@ public class ClientHandler extends Thread
         {
             return;
         }
-        Vector<SCFile> allFiles = mClients.getFiles();
+        ArrayList<SCFile> allFiles = mClients.getFiles();
 
         for (SCFile f : allFiles)
         {
