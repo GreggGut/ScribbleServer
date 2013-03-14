@@ -255,7 +255,7 @@ public class ClientHandler extends Thread
     {
         try
         {
-            String username = info[2];
+            String username = info[2].toLowerCase();
             String password = info[3];
 
             //TOCONF For now I am storing the username/password in a file. This would have to be implemented in a database.

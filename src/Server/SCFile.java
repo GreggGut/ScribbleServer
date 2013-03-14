@@ -304,5 +304,9 @@ public class SCFile
         {
             System.out.println("NumberFormatException");
         }
+        catch (Exception x)
+        {
+            System.out.println("Exception is restoring a file");
+        }
     }
 }
