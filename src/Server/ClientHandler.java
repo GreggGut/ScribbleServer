@@ -436,6 +436,7 @@ public class ClientHandler extends Thread
                 mode = false;
             }
             int color = Integer.parseInt(info[4]);
+            System.out.println("Color: " + color);
             int page = Integer.parseInt(info[5]);
             int width = Integer.parseInt(info[6]);
 
@@ -784,7 +785,7 @@ public class ClientHandler extends Thread
                 String newFile = NetworkProtocol.split;
                 newFile += NetworkProtocol.GET_FILE_LIST;
                 newFile += NetworkProtocol.split;
-                newFile+=fileName;
+                newFile += fileName;
                 newFile = encriptMessage(newFile);
                 mClients.broadcast(newFile, me, true);
             }
