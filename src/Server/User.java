@@ -14,6 +14,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -29,6 +31,7 @@ public class User
     private Path workingPath;
     private Socket clientSock;
     private String username;
+    private boolean busy = false;
 
     User(String clientAdd, int port, PrintWriter out, Socket clientSock)
     {
@@ -48,6 +51,11 @@ public class User
         return false;
     }
 
+    public void setBusy(boolean t)
+    {
+        busy=t;
+    }
+
     public boolean matchesUser(String user)
     {
         if (user.equals(username))
@@ -58,6 +66,23 @@ public class User
     }
 
     synchronized public void sendMessage(String msg)
+    {
+        while (busy)
+        {
+
+            try
+            {
+                Thread.currentThread().sleep(100);
+            }
+            catch (InterruptedException ex)
+            {
+                Logger.getLogger(User.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        out.println(msg);
+    }
+
+    synchronized public void sendUpdateMessage(String msg)
     {
         out.println(msg);
     }

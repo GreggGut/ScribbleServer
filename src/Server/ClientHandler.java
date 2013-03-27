@@ -407,6 +407,7 @@ public class ClientHandler extends Thread
         {
             if (f.getName().equals(info[2]))
             {
+                me.setBusy(true);
                 System.out.println("File      " + f.getName());
                 me.setmFile(f);
                 break;
@@ -634,7 +635,7 @@ public class ClientHandler extends Thread
                     toSend += NetworkProtocol.split;
                     toSend += path.getPage();
                     toSend = encriptMessage(toSend);
-                    me.sendMessage(toSend);
+                    me.sendUpdateMessage(toSend);
                 }
                 else if (path.getType() == Path.REDO)
                 {
@@ -643,7 +644,7 @@ public class ClientHandler extends Thread
                     toSend += NetworkProtocol.split;
                     toSend += path.getPage();
                     toSend = encriptMessage(toSend);
-                    me.sendMessage(toSend);
+                    me.sendUpdateMessage(toSend);
                 }
                 else if (path.getType() == Path.CLEARALL)
                 {
@@ -652,7 +653,7 @@ public class ClientHandler extends Thread
                     toSend += NetworkProtocol.split;
                     toSend += path.getPage();
                     toSend = encriptMessage(toSend);
-                    me.sendMessage(toSend);
+                    me.sendUpdateMessage(toSend);
                 }
             }
         }
@@ -663,7 +664,7 @@ public class ClientHandler extends Thread
             String toSend = NetworkProtocol.split;
             toSend += NetworkProtocol.RELEASE_OWNERSHIP;
             toSend = encriptMessage(toSend);
-            me.sendMessage(toSend);
+            me.sendUpdateMessage(toSend);
         }
         else
         {
@@ -672,9 +673,10 @@ public class ClientHandler extends Thread
             toSend += NetworkProtocol.split;
             toSend += me.getmFile().getPresentOwner().getUsername();
             toSend = encriptMessage(toSend);
-            me.sendMessage(toSend);
+            me.sendUpdateMessage(toSend);
         }
 
+        me.setBusy(false);
         System.out.println("Updating file ended");
     }
 
@@ -708,7 +710,7 @@ public class ClientHandler extends Thread
         System.out.println(mPath);
 
         mPath = encriptMessage(mPath);
-        me.sendMessage(mPath);
+        me.sendUpdateMessage(mPath);
 
         ArrayList<Point> points = path.getmPoints();
         String start = NetworkProtocol.split;
@@ -728,7 +730,7 @@ public class ClientHandler extends Thread
             {
                 mPoints = mPoints.substring(0, mPoints.length() - 1);
                 mPoints = encriptMessage(mPoints);
-                me.sendMessage(mPoints);
+                me.sendUpdateMessage(mPoints);
 
                 mPoints = start;
             }
@@ -737,13 +739,13 @@ public class ClientHandler extends Thread
         {
             mPoints = mPoints.substring(0, mPoints.length() - 1);
             mPoints = encriptMessage(mPoints);
-            me.sendMessage(mPoints);
+            me.sendUpdateMessage(mPoints);
         }
 
         String endpath = NetworkProtocol.split;
         endpath += NetworkProtocol.END_PATH;
         endpath = encriptMessage(endpath);
-        me.sendMessage(endpath);
+        me.sendUpdateMessage(endpath);
     }
 
     private void createNewDocument(String[] info)
