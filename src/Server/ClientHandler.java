@@ -407,9 +407,8 @@ public class ClientHandler extends Thread
         {
             if (f.getName().equals(info[2]))
             {
-                me.setBusy(true);
                 System.out.println("File      " + f.getName());
-                me.setmFile(f);
+                me.setTempFile(f);
                 break;
             }
         }
@@ -443,7 +442,8 @@ public class ClientHandler extends Thread
 
             Path path = new Path(pathID, mode, color, width, page);
 
-            me.setWorkingPath(path);
+            me.getmFile().setWorkingPath(path);
+            //me.getmFile().getPages().get(page).addPath(path);
 
             //If everything got parsed then we can forward it to all clients
             mClients.broadcast(line, me, false);
@@ -478,7 +478,7 @@ public class ClientHandler extends Thread
             int y = Integer.parseInt(allPoints[i++]);
 
             Point point = new Point(x, y);
-            me.getWorkingPath().AddPoint(point);
+            me.getmFile().getWorkingPath().AddPoint(point);
             //System.out.println("Added point in addPOint");
         }
 
@@ -491,8 +491,8 @@ public class ClientHandler extends Thread
      */
     private void endPath(String line)
     {
-        me.getmFile().getPages().get(me.getWorkingPath().getPage()).addPath(me.getWorkingPath());
-        me.setWorkingPath(null);
+        me.getmFile().getPages().get(me.getmFile().getWorkingPath().getPage()).addPath(me.getmFile().getWorkingPath());
+        me.getmFile().setWorkingPath(null);
 
         mClients.broadcast(line, me, false);
     }
@@ -595,6 +595,7 @@ public class ClientHandler extends Thread
             Path newPath = new Path(Path.CLEARALL, page);
             me.getmFile().getPages().get(page).addPath(newPath);
 
+
             mClients.broadcast(line, me, false);
         }
         catch (NumberFormatException x)
@@ -617,8 +618,7 @@ public class ClientHandler extends Thread
      */
     private void updateUserwithFileContent()
     {
-
-        SCFile file = me.getmFile();
+        SCFile file = me.getTempFile();
         System.out.println("Updating file");
         for (Page page : file.getPages())
         {
@@ -635,7 +635,7 @@ public class ClientHandler extends Thread
                     toSend += NetworkProtocol.split;
                     toSend += path.getPage();
                     toSend = encriptMessage(toSend);
-                    me.sendUpdateMessage(toSend);
+                    me.sendMessage(toSend);
                 }
                 else if (path.getType() == Path.REDO)
                 {
@@ -644,7 +644,7 @@ public class ClientHandler extends Thread
                     toSend += NetworkProtocol.split;
                     toSend += path.getPage();
                     toSend = encriptMessage(toSend);
-                    me.sendUpdateMessage(toSend);
+                    me.sendMessage(toSend);
                 }
                 else if (path.getType() == Path.CLEARALL)
                 {
@@ -653,10 +653,18 @@ public class ClientHandler extends Thread
                     toSend += NetworkProtocol.split;
                     toSend += path.getPage();
                     toSend = encriptMessage(toSend);
-                    me.sendUpdateMessage(toSend);
+                    me.sendMessage(toSend);
                 }
             }
         }
+
+        updateWorkingPath();
+        me.setmFile(me.getTempFile());
+
+        String toSend2 = NetworkProtocol.split;
+        toSend2 += NetworkProtocol.UPDATE_FILE;
+        toSend2 = encriptMessage(toSend2);
+        me.sendMessage(toSend2);
 
         //sedning who is the owner
         if (me.getmFile().getPresentOwner() == null)
@@ -664,7 +672,7 @@ public class ClientHandler extends Thread
             String toSend = NetworkProtocol.split;
             toSend += NetworkProtocol.RELEASE_OWNERSHIP;
             toSend = encriptMessage(toSend);
-            me.sendUpdateMessage(toSend);
+            me.sendMessage(toSend);
         }
         else
         {
@@ -673,10 +681,9 @@ public class ClientHandler extends Thread
             toSend += NetworkProtocol.split;
             toSend += me.getmFile().getPresentOwner().getUsername();
             toSend = encriptMessage(toSend);
-            me.sendUpdateMessage(toSend);
+            me.sendMessage(toSend);
         }
 
-        me.setBusy(false);
         System.out.println("Updating file ended");
     }
 
@@ -710,7 +717,7 @@ public class ClientHandler extends Thread
         System.out.println(mPath);
 
         mPath = encriptMessage(mPath);
-        me.sendUpdateMessage(mPath);
+        me.sendMessage(mPath);
 
         ArrayList<Point> points = path.getmPoints();
         String start = NetworkProtocol.split;
@@ -730,7 +737,7 @@ public class ClientHandler extends Thread
             {
                 mPoints = mPoints.substring(0, mPoints.length() - 1);
                 mPoints = encriptMessage(mPoints);
-                me.sendUpdateMessage(mPoints);
+                me.sendMessage(mPoints);
 
                 mPoints = start;
             }
@@ -739,13 +746,79 @@ public class ClientHandler extends Thread
         {
             mPoints = mPoints.substring(0, mPoints.length() - 1);
             mPoints = encriptMessage(mPoints);
-            me.sendUpdateMessage(mPoints);
+            me.sendMessage(mPoints);
         }
 
         String endpath = NetworkProtocol.split;
         endpath += NetworkProtocol.END_PATH;
         endpath = encriptMessage(endpath);
-        me.sendUpdateMessage(endpath);
+        me.sendMessage(endpath);
+    }
+
+    void updateWorkingPath()
+    {
+        Path path = me.getTempFile().getWorkingPath();
+        if (path != null)
+        {
+            String mPath = NetworkProtocol.split;
+            mPath += String.valueOf(NetworkProtocol.NEW_PATH);
+            mPath += NetworkProtocol.split;
+
+            mPath += path.getId();
+            mPath += NetworkProtocol.split;
+
+            int mode = 1;
+            if (!path.getMode())
+            {
+                mode = 0;
+            }
+            mPath += mode;
+            mPath += NetworkProtocol.split;
+
+            mPath += path.getColor();
+            mPath += NetworkProtocol.split;
+
+            mPath += path.getPage();
+            mPath += NetworkProtocol.split;
+
+            mPath += path.getWidth();
+            mPath += NetworkProtocol.split;
+
+            System.out.println(mPath);
+
+            mPath = encriptMessage(mPath);
+            me.sendMessage(mPath);
+
+            ArrayList<Point> points = path.getmPoints();
+            String start = NetworkProtocol.split;
+            start += String.valueOf(NetworkProtocol.ADD_POINTS);
+            start += NetworkProtocol.split;
+            String mPoints = start;
+            for (Point point : points)
+            {
+                if (mPoints.length() < 220)
+                {
+                    mPoints += point.x();
+                    mPoints += NetworkProtocol.splitPoints;
+                    mPoints += point.y();
+                    mPoints += NetworkProtocol.splitPoints;
+                }
+                else
+                {
+                    mPoints = mPoints.substring(0, mPoints.length() - 1);
+                    mPoints = encriptMessage(mPoints);
+                    me.sendMessage(mPoints);
+
+                    mPoints = start;
+                }
+            }
+            if (!mPoints.equals(start))
+            {
+                mPoints = mPoints.substring(0, mPoints.length() - 1);
+                mPoints = encriptMessage(mPoints);
+                me.sendMessage(mPoints);
+            }
+        }
     }
 
     private void createNewDocument(String[] info)

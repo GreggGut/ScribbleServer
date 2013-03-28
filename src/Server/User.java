@@ -14,6 +14,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.sql.Time;
+import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -28,10 +30,11 @@ public class User
     private int port;
     private PrintWriter out;
     private SCFile mFile;
-    private Path workingPath;
+    private SCFile mTempFile;
+//    private Path workingPath;
     private Socket clientSock;
     private String username;
-    private boolean busy = false;
+//    private boolean busy = false;
 
     User(String clientAdd, int port, PrintWriter out, Socket clientSock)
     {
@@ -51,10 +54,10 @@ public class User
         return false;
     }
 
-    public void setBusy(boolean t)
-    {
-        busy=t;
-    }
+//    public void setBusy(boolean t)
+//    {
+//        busy=t;
+//    }
 
     public boolean matchesUser(String user)
     {
@@ -67,25 +70,27 @@ public class User
 
     synchronized public void sendMessage(String msg)
     {
-        while (busy)
-        {
-
-            try
-            {
-                Thread.currentThread().sleep(100);
-            }
-            catch (InterruptedException ex)
-            {
-                Logger.getLogger(User.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
+//        Random generator = new Random();
+//        while (busy)
+//        {
+//            System.out.println("Busy..."+generator.nextInt());
+//            try
+//            {
+//                Thread.currentThread().sleep(50);
+//            }
+//            catch (InterruptedException ex)
+//            {
+//                System.out.println("Busy failed...");
+//                Logger.getLogger(User.class.getName()).log(Level.SEVERE, null, ex);
+//            }
+//        }
         out.println(msg);
     }
 
-    synchronized public void sendUpdateMessage(String msg)
-    {
-        out.println(msg);
-    }
+//    synchronized public void sendUpdateMessage(String msg)
+//    {
+//        out.println(msg);
+//    }
 
     private String encriptMessage(String toSend)
     {
@@ -178,15 +183,25 @@ public class User
         }
     }
 
-    public Path getWorkingPath()
+    public void setTempFile(SCFile mFile)
     {
-        return workingPath;
+        mTempFile = mFile;
     }
 
-    public void setWorkingPath(Path workingPath)
+    public SCFile getTempFile()
     {
-        this.workingPath = workingPath;
+        return mTempFile;
     }
+
+//    public Path getWorkingPath()
+//    {
+//        return workingPath;
+//    }
+//
+//    public void setWorkingPath(Path workingPath)
+//    {
+//        this.workingPath = workingPath;
+//    }
 
     public String getUsername()
     {

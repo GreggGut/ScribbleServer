@@ -32,6 +32,7 @@ public class SCFile
     private static final String splitPoints = ";";
     private static final String ENCODING = "UTF-8";
     public static final String folder = "documents//";
+    private Path workingPath;
 
     /**
      * Default constructor
@@ -308,5 +309,15 @@ public class SCFile
         {
             System.out.println("Exception is restoring a file");
         }
+    }
+
+    public Path getWorkingPath()
+    {
+        return workingPath;
+    }
+
+    public void setWorkingPath(Path workingPath)
+    {
+        this.workingPath = workingPath;
     }
 }
