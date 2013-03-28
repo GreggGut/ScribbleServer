@@ -6,6 +6,7 @@ package Server;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -159,12 +160,102 @@ public class SCFile
      */
     synchronized public void saveFileContent(Path path)
     {
+        if (path.getType() != Path.CLEARALL)
+        {
+            try
+            {
+                String toSave = pathToString(path);
+                out.write(toSave);
+                //Flushing is used so that the content is written to the file right away
+                out.flush();
+            }
+            catch (IOException ex)
+            {
+                Logger.getLogger(SCFile.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        else
+        {
+            //need to erase the file content from that page....
+            removeAllInfoFromFileOnPage(path);
+        }
+
+    }
+
+    private void removeAllInfoFromFileOnPage(Path path)
+    {
+        Writer newout = null;
         try
         {
-            String toSave = pathToString(path);
-            out.write(toSave);
-            //Flushing is used so that the content is written to the file right away
-            out.flush();
+            String savedNametmp = name.substring(0, name.length() - 4).concat("_tmp.scf");
+            System.out.println(savedNametmp);
+            FileOutputStream newFileOutput = new FileOutputStream(folder + savedNametmp, true);
+            newout = new BufferedWriter(new OutputStreamWriter(newFileOutput, "UTF-8"));
+
+
+            Reader in = null;
+            BufferedReader mBuffer = null;
+            String savedName = null;
+            try
+            {
+                savedName = name.substring(0, name.length() - 4).concat(".scf");
+                System.out.println(savedName);
+                FileInputStream oldFile = new FileInputStream(folder + savedName);
+                in = new InputStreamReader(oldFile, ENCODING);
+                mBuffer = new BufferedReader(in);
+                String line;
+                while ((line = mBuffer.readLine()) != null)
+                {
+                    if (!line.startsWith(String.valueOf(path.getPage())))
+                    {
+                        newout.write(line + "\n");
+                    }
+                }
+            }
+            catch (FileNotFoundException ex)
+            {
+                System.out.println(savedName + " file not found. The content will not be restored");
+            }
+            catch (UnsupportedEncodingException ex)
+            {
+                System.out.println(ENCODING + " encoding is unsupported and " + savedName + " will not be restored");
+            }
+            catch (IOException ex)
+            {
+                System.out.println("An I/O exception occured during file recovery. " + savedName + " will not be resoted");
+            }
+            finally
+            {
+                try
+                {
+                    mBuffer.close();
+                    in.close();
+                    newout.close();
+                    newFileOutput.close();
+
+                    new File(folder + savedName).delete();
+                    File toBerenamed = new File(folder + savedName);
+                    new File(folder + savedNametmp).renameTo(toBerenamed);
+                    System.out.println("Renamed!!!!");
+                }
+                catch (IOException ex)
+                {
+                    System.out.println("An I/O exception occured while closing " + savedName + " file.");
+                    ex.printStackTrace();
+                }
+                catch (NullPointerException x)
+                {
+                    System.out.println("An Null pointer exception occured while closing " + savedName + " buffer.");
+                }
+            }
+        }
+        catch (UnsupportedEncodingException ex)
+        {
+            Logger.getLogger(SCFile.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        catch (FileNotFoundException ex)
+        {
+            Logger.getLogger(SCFile.class.getName()).log(Level.SEVERE, null, ex);
         }
         catch (IOException ex)
         {

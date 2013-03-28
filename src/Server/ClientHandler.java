@@ -591,10 +591,9 @@ public class ClientHandler extends Thread
              */
             int page = Integer.parseInt(info[2]);
 
-            //me.getmFile().getPages().get(page).clearPage();
+            me.getmFile().getPages().get(page).clearPage();
             Path newPath = new Path(Path.CLEARALL, page);
             me.getmFile().getPages().get(page).addPath(newPath);
-
 
             mClients.broadcast(line, me, false);
         }

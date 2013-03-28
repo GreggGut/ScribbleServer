@@ -193,16 +193,6 @@ public class User
         return mTempFile;
     }
 
-//    public Path getWorkingPath()
-//    {
-//        return workingPath;
-//    }
-//
-//    public void setWorkingPath(Path workingPath)
-//    {
-//        this.workingPath = workingPath;
-//    }
-
     public String getUsername()
     {
         return username;
